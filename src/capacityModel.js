@@ -100,7 +100,7 @@ export function calculateCapacity(person, projects, period) {
       const hours = Number(allocation.hoursPerWeek) * workdays / 5;
       breakdown.push({
         projectId: project.id, projectName: project.name, exactCode: project.exactCode, projectTeam: project.team,
-        allocationId: allocation.id, startDate, endDate, workdays,
+        allocationId: allocation.id, taskName: allocation.taskName, startDate, endDate, workdays,
         hoursPerWeek: Number(allocation.hoursPerWeek), hours: round(hours),
       });
     }

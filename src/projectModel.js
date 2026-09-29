@@ -1,3 +1,4 @@
+import { hasSustainabilityShape, validateSustainability } from './sustainabilityModel.js';
 export const PROJECT_STORAGE_KEY = 'ruimte-projecten-v1';
 const text = value => typeof value === 'string' ? value.trim() : '';
 
@@ -24,7 +25,8 @@ export function validateProject(project, people, otherProjects = []) {
   if (!text(project.exactCode)) return 'Vul de Exact-code in.';
   if (!text(project.leader)) return 'Vul de projectleider in.';
   if (!text(project.team)) return 'Selecteer een team.';
-  if (project.type !== 'project') return 'Dit projecttype is nog niet beschikbaar.';
+  if (!['project', 'sustainability'].includes(project.type)) return 'Dit projecttype is nog niet beschikbaar.';
+  if (project.type === 'sustainability') { const error = validateSustainability(project, people); if (error) return error; }
   const sameCode = otherProjects.some(p => p.id !== project.id && p.team === project.team && p.exactCode.trim().toLocaleLowerCase('nl-NL') === project.exactCode.trim().toLocaleLowerCase('nl-NL'));
   if (sameCode) return 'Er bestaat al een project met deze Exact-code binnen dit team.';
   if (!Array.isArray(project.allocations)) return 'De medewerkersplanning ontbreekt.';
@@ -44,7 +46,8 @@ export function validateProject(project, people, otherProjects = []) {
 }
 
 function hasStoredShape(project) {
-  return project && typeof project === 'object' && text(project.id) && project.type === 'project'
+  return project && typeof project === 'object' && text(project.id) && ['project', 'sustainability'].includes(project.type)
+    && (project.type !== 'sustainability' || hasSustainabilityShape(project))
     && ['team', 'name', 'exactCode', 'leader'].every(key => text(project[key]))
     && Array.isArray(project.allocations) && project.allocations.every(a => a && text(a.id) && text(a.employeeId)
       && typeof a.employeeName === 'string' && isValidDate(a.startDate) && isValidDate(a.endDate)

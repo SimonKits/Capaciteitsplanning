@@ -59,7 +59,19 @@ Het menuonderdeel **Projecten** vervangt **Rooster**.
 - Uren in stappen van een kwartier. Projecten kunnen alvast zonder medewerkers worden opgeslagen.
 - Exact-codes zijn uniek binnen een team. Er is geen koppeling met de Exact-software.
 - Projecten en hun planning bewerken of verwijderen.
-- Verduurzamingsprojecten hebben een eigen plaats; de invoer en planning hiervan volgen later.
+- Verduurzamingsprojecten hebben een eigen tabblad met fases en rolplanning (zie hieronder).
+
+## Verduurzamingsprojecten
+
+- Projectnaam, Exact-code, team en een projectleider uit de medewerkerslijst.
+- Vier vaste fases: EAR, PP, RP en DE. Elke fase duurt 1–520 hele weken; een week bestaat uit zeven kalenderdagen. Alleen maandag t/m vrijdag telt mee in de projecturen.
+- EAR heeft een eigen startdatum. Iedere volgende fase kan aan de voorgaande gekoppeld worden en begint dan de dag na diens einddatum. Wijzigingen in start of duur werken direct door in de gekoppelde vervolgfasen. Een losgekoppelde fase houdt haar startdatum; volgende fases kunnen daar weer aan gekoppeld blijven.
+- Projectbrede medewerkers met de rollen Projectleider, Projectleider Participatie, Planontwikkelaar en Programmamanager. Per fase stel je voor iedere rol de uren per medewerker per week in. Nul uur betekent geen inzet.
+- Extra medewerkers kunnen voor één specifieke fase worden toegevoegd. Per medewerker kun je een fase uitschakelen, afwijkende uren kiezen of een eigen begin- en einddatum instellen, ook buiten de fasedatums. Eigen datums blijven vast bij verschuiving; uitschakelen van de eigen tijdlijn herstelt de koppeling aan de fase.
+- Meerdere rollen of overlappende fases voor dezelfde medewerker tellen op in de capaciteit. Dezelfde medewerker/rol kan maar één keer binnen dezelfde fase staan.
+- Bij het kiezen van de projectleider wordt die medewerker als projectbrede Projectleider toegevoegd. Bij een latere wisseling blijft de eerdere inzet staan totdat je die zelf verwijdert.
+- De fase-uren en projecttotalen houden rekening met verlof en ingeschakeld conceptverlof. De capaciteit toont fase en rol bij de inzetdetails.
+- Medewerkers die als projectleider, projectbrede medewerker of extra fasemedewerker gekoppeld zijn, kunnen niet worden verwijderd, ook als hun uren nog nul zijn.
 
 ## Capaciteit
 

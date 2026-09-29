@@ -73,7 +73,7 @@ function App() {
   }
   function removePerson(p) {
     if (projectState.error) { notify('Medewerkers verwijderen is geblokkeerd zolang de projectplanning niet kan worden gelezen.'); return; }
-    if (projectState.projects.some(project => project.allocations.some(a => String(a.employeeId) === String(p.id)))) {
+    if (projectState.projects.some(project => project.allocations.some(a => String(a.employeeId) === String(p.id)) || project.leaderId === String(p.id) || project.members?.some(member => member.employeeId === String(p.id)) || project.phases?.some(phase => phase.extras.some(member => member.employeeId === String(p.id))))) {
       notify('Deze medewerker is gekoppeld aan een project. Verwijder eerst diens projectplanning.');
       return;
     }
