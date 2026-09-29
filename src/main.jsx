@@ -2,6 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { UsersRound, LayoutDashboard, CalendarDays, ChartNoAxesCombined, Settings, Plus, Search, ChevronDown, ChevronLeft, ChevronRight, MoreHorizontal, X, Clock3, BriefcaseBusiness, Check, Trash2, Pencil, Menu, Sparkles, ArrowUpRight } from 'lucide-react';
 import './styles.css';
+import Projects from './Projects.jsx';
+import { readProjects, writeProjects } from './projectModel.js';
 
 const weekdays = [
   { id: 'ma', label: 'Maandag', short: 'Ma' }, { id: 'di', label: 'Dinsdag', short: 'Di' },
@@ -21,7 +23,9 @@ const initialStored = () => { try { const saved = localStorage.getItem('ruimte-m
 
 function App() {
   const [people, setPeople] = useState(initialStored);
-  const [active, setActive] = useState('Medewerkers');
+  const [active, setActive] = useState(() => window.location.hash === '#projecten' ? 'Projecten' : 'Medewerkers');
+  const [projectState, setProjectState] = useState(() => readProjects({ getItem: key => localStorage.getItem(key) }));
+  const [projectSaveError, setProjectSaveError] = useState('');
   const [query, setQuery] = useState('');
   const [teamFilter, setTeamFilter] = useState('Alle teams');
   const [modal, setModal] = useState(false);
@@ -33,6 +37,18 @@ function App() {
   const filtered = people.filter(p => `${p.name} ${p.role} ${p.team}`.toLowerCase().includes(query.toLowerCase()) && (teamFilter === 'Alle teams' || p.team === teamFilter));
   const totalHours = people.reduce((a, p) => a + Number(p.contract), 0);
   function persist(next) { setPeople(next); localStorage.setItem('ruimte-medewerkers', JSON.stringify(next)); }
+  function persistProjects(next) {
+    if (projectState.error) return false;
+    try {
+      writeProjects(localStorage, next);
+      setProjectState({ projects: next, error: '' });
+      setProjectSaveError('');
+      return true;
+    } catch {
+      setProjectSaveError('Opslaan is niet gelukt. Controleer of je browser lokale opslag toestaat en probeer opnieuw. Je wijzigingen zijn nog niet opgeslagen.');
+      return false;
+    }
+  }
   function notify(message) { setToast(message); window.setTimeout(() => setToast(''), 2600); }
   function openAdd() { setEditing(null); setForm({ name: '', role: '', team: '', contract: '', days: {} }); setModal(true); }
   function openEdit(p) { setEditing(p.id); setForm({ name: p.name, role: p.role, team: p.team, contract: String(p.contract), days: { ...p.days } }); setModal(true); }
@@ -44,8 +60,15 @@ function App() {
     const next = { ...form, id: editing || Date.now(), contract: Number(form.contract), color: old?.color || colors[people.length % colors.length], initials: form.name.trim().split(/\s+/).slice(0, 2).map(s => s[0]).join('').toUpperCase() };
     persist(editing ? people.map(p => p.id === editing ? next : p) : [next, ...people]); setModal(false); notify(editing ? 'Medewerker bijgewerkt' : 'Medewerker toegevoegd');
   }
-  function removePerson(p) { if (window.confirm(`Weet je zeker dat je ${p.name} wilt verwijderen?`)) { persist(people.filter(x => x.id !== p.id)); notify('Medewerker verwijderd'); } }
-  const nav = [{ label: 'Overzicht', icon: LayoutDashboard }, { label: 'Medewerkers', icon: UsersRound }, { label: 'Rooster', icon: CalendarDays }, { label: 'Capaciteit', icon: ChartNoAxesCombined }];
+  function removePerson(p) {
+    if (projectState.error) { notify('Medewerkers verwijderen is geblokkeerd zolang de projectplanning niet kan worden gelezen.'); return; }
+    if (projectState.projects.some(project => project.allocations.some(a => String(a.employeeId) === String(p.id)))) {
+      notify('Deze medewerker is gekoppeld aan een project. Verwijder eerst diens projectplanning.');
+      return;
+    }
+    if (window.confirm(`Weet je zeker dat je ${p.name} wilt verwijderen?`)) { persist(people.filter(x => x.id !== p.id)); notify('Medewerker verwijderd'); }
+  }
+  const nav = [{ label: 'Overzicht', icon: LayoutDashboard }, { label: 'Medewerkers', icon: UsersRound }, { label: 'Projecten', icon: BriefcaseBusiness }, { label: 'Capaciteit', icon: ChartNoAxesCombined }];
   return <div className="app-shell">
     <aside className={`sidebar ${mobileNav ? 'sidebar-open' : ''}`}>
       <a className="brand" href="#" onClick={e => e.preventDefault()}><span className="brand-mark"><i/><i/><i/><i/></span><span>ruimte<span className="brand-dot">.</span></span></a>
@@ -57,7 +80,7 @@ function App() {
     </aside>
     {mobileNav && <button aria-label="Menu sluiten" className="mobile-scrim" onClick={() => setMobileNav(false)}/>}
     <main className="main-area">
-      <header className="topbar"><button className="mobile-menu" aria-label="Menu" onClick={() => setMobileNav(true)}><Menu size={20}/></button><div className="breadcrumbs"><span>Werkplek</span><span className="crumb-slash">/</span><strong>{active}</strong></div><div className="topbar-right"><span className="today-pill"><span className="live-dot"/> Week 42 <span className="crumb-slash">·</span> 14 okt 2024</span><div className="top-avatar">MV</div></div></header>
+      <header className="topbar"><button className="mobile-menu" aria-label="Menu" onClick={() => setMobileNav(true)}><Menu size={20}/></button><div className="breadcrumbs"><span>Werkplek</span><span className="crumb-slash">/</span><strong>{active}</strong></div><div className="topbar-right"><span className="today-pill"><span className="live-dot"/>{new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date())}</span><div className="top-avatar">MV</div></div></header>
       {active === 'Medewerkers' ? <section className="page-content">
         <div className="page-heading"><div><div className="eyebrow">JE TEAM</div><h1>Medewerkers<span className="heading-period">.</span></h1><p className="page-subtitle">Houd contracten, werkdagen en teams op één plek bij.</p></div><button className="primary-button" onClick={openAdd}><Plus size={18}/> Medewerker toevoegen</button></div>
         <div className="stats-row"><div className="stat-card"><div className="stat-top"><span>Medewerkers</span><span className="stat-icon lavender"><UsersRound size={17}/></span></div><div className="stat-number">{people.length}<span className="stat-unit"> mensen</span></div><div className="stat-foot"><span className="status-dot green"/> Actief in de planning</div></div><div className="stat-card"><div className="stat-top"><span>Contracturen</span><span className="stat-icon apricot"><Clock3 size={17}/></span></div><div className="stat-number">{totalHours}<span className="stat-unit"> u / week</span></div><div className="stat-foot">Samen afgesproken per week</div></div><div className="stat-card"><div className="stat-top"><span>Teams</span><span className="stat-icon mint"><BriefcaseBusiness size={17}/></span></div><div className="stat-number">{teams.length}<span className="stat-unit"> teams</span></div><div className="stat-foot">Met medewerkers gekoppeld</div></div></div>
@@ -67,7 +90,10 @@ function App() {
           {filtered.length === 0 && <div className="empty-state"><div className="empty-icon"><UsersRound size={23}/></div><strong>Geen medewerkers gevonden</strong><span>Probeer een andere zoekterm of voeg iemand toe.</span>{people.length === 0 && <button className="primary-button" onClick={openAdd}><Plus size={16}/> Medewerker toevoegen</button>}</div>}
           <div className="table-footer"><span>{filtered.length} van {people.length} medewerkers</span><div className="pagination"><button disabled aria-label="Vorige pagina"><ChevronLeft size={16}/></button><span>1</span><button disabled aria-label="Volgende pagina"><ChevronRight size={16}/></button></div></div></div>
         <div className="bottom-note"><div className="note-icon"><Check size={15}/></div><span>Contracturen bijgewerkt voor <strong>week 42</strong></span><span className="note-divider">·</span><span>Laatste wijziging vandaag om 09:41</span><button onClick={() => notify('Er zijn geen recente wijzigingen om te bekijken')}>Geschiedenis bekijken</button></div>
-      </section> : <section className="page-content placeholder-page"><div className="eyebrow">JE TEAM</div><h1>{active}<span className="heading-period">.</span></h1><div className="placeholder-card"><div className="placeholder-icon"><CalendarDays size={24}/></div><h2>Dit onderdeel volgt binnenkort</h2><p>We bouwen stap voor stap verder. Je medewerkers en contracturen staan alvast klaar om hier straks in mee te plannen.</p><button className="secondary-button" onClick={() => setActive('Medewerkers')}>Bekijk medewerkers <ArrowUpRight size={15}/></button></div></section>}
+      </section> : active === 'Projecten' ? <>
+        {(projectState.error || projectSaveError) && <div role="alert" className="project-storage-error">{projectState.error || projectSaveError}</div>}
+        <Projects people={people} projects={projectState.projects} onChange={persistProjects} onEmployees={() => setActive('Medewerkers')}/>
+      </> : <section className="page-content placeholder-page"><div className="eyebrow">JE TEAM</div><h1>{active}<span className="heading-period">.</span></h1><div className="placeholder-card"><div className="placeholder-icon"><CalendarDays size={24}/></div><h2>Dit onderdeel volgt binnenkort</h2><p>We bouwen stap voor stap verder. Je medewerkers, contracturen en projectplanning staan alvast klaar om hier straks mee te plannen.</p><button className="secondary-button" onClick={() => setActive('Projecten')}>Bekijk projecten <ArrowUpRight size={15}/></button></div></section>}
     </main>
     {modal && <div className="modal-backdrop" onMouseDown={e => { if (e.target === e.currentTarget) setModal(false); }}><div className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div className="modal-header"><div><div className="eyebrow">TEAMBEHEER</div><h2 id="modal-title">{editing ? 'Medewerker bewerken' : 'Nieuwe medewerker'}</h2><p>Vul de contract- en werkdagen in.</p></div><button className="modal-close" aria-label="Sluiten" onClick={() => setModal(false)}><X size={19}/></button></div>
       <form onSubmit={savePerson}><div className="form-grid"><label className="field full"><span>Naam medewerker <b>*</b></span><input required autoFocus placeholder="Bijv. Noor Jansen" value={form.name} onChange={e => setForm({...form, name:e.target.value})}/></label><label className="field"><span>Functie</span><input placeholder="Bijv. Verpleegkundige" value={form.role} onChange={e => setForm({...form, role:e.target.value})}/></label><label className="field"><span>Team <b>*</b></span><input required list="team-options" placeholder="Bijv. Team Noord" value={form.team} onChange={e => setForm({...form, team:e.target.value})}/><datalist id="team-options">{teams.map(t => <option key={t} value={t}/>)}</datalist></label><label className="field"><span>Contracturen per week <b>*</b></span><div className="input-suffix"><input required type="number" min="1" max="80" step="0.5" placeholder="32" value={form.contract} onChange={e => setForm({...form, contract:e.target.value})}/><span>uur</span></div></label><div className="field full"><div className="days-heading"><span>Werkdagen en uren</span><small>Vul de uren per dag in</small></div><div className="day-fields">{weekdays.map(d => <label className={`day-field ${Number(form.days[d.id]) > 0 ? 'day-selected' : ''}`} key={d.id}><span>{d.short}</span><input aria-label={`${d.label} uren`} type="number" min="0" max="24" step="0.5" placeholder="–" value={form.days[d.id] ?? ''} onChange={e => setForm({...form, days:{...form.days,[d.id]:e.target.value}})}/><small>uur</small></label>)}</div><div className={`form-total ${Object.values(form.days).reduce((a,b) => a + Number(b || 0), 0) > Number(form.contract) ? 'form-total-error' : ''}`}><span>Totaal ingepland</span><strong>{Object.values(form.days).reduce((a,b) => a + Number(b || 0), 0)} uur <i>/ {form.contract || 0} contracturen</i></strong></div></div></div><div className="modal-footer"><button type="button" className="cancel-button" onClick={() => setModal(false)}>Annuleren</button><button type="submit" className="primary-button"><Check size={16}/>{editing ? 'Wijzigingen opslaan' : 'Medewerker toevoegen'}</button></div></form></div></div>}
