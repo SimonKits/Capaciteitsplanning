@@ -1,0 +1,18 @@
+/* Tsavo palette and typography, adapted to Tuesday's existing app layout. */
+:root{--tsavo-petrol:#004e54;--tsavo-turquoise:#008692;--tsavo-orange:#e66239;font-family:'Roboto',Arial,sans-serif;color:#173c40;background:#f5f8f8}
+.brand{font-family:'Zilla Slab',Georgia,serif;font-size:36px;font-weight:700;letter-spacing:-1px;color:var(--tsavo-petrol);padding-bottom:12px}
+.brand-dot,.heading-period{color:var(--tsavo-orange)}
+.tsavo-brand{display:flex;align-items:center;gap:12px;padding:0 10px 22px;margin-bottom:12px;border-bottom:1px solid #e2ebec;text-decoration:none;color:#527177}
+.tsavo-brand img{width:76px;height:48px;object-fit:contain}.tsavo-brand span{font-size:10px;letter-spacing:.3px}
+.nav-item.active{background:#e4f1f2;color:var(--tsavo-petrol);box-shadow:inset 3px 0 var(--tsavo-orange)}.nav-item.active>svg{color:var(--tsavo-turquoise)}
+h1,.modal-header h2,.project-dialog-header h2{font-family:'Zilla Slab',Georgia,serif;color:var(--tsavo-petrol)}h1{font-size:34px;letter-spacing:-.6px}
+.eyebrow{color:var(--tsavo-turquoise)}.primary-button{background:var(--tsavo-petrol);border-color:var(--tsavo-petrol);color:white}.primary-button:hover{background:#00636b;border-color:#00636b}
+.primary-button svg{color:#fff}.secondary-button,.project-text-button{color:var(--tsavo-petrol)}
+.topbar{border-top:3px solid var(--tsavo-petrol)}.breadcrumbs strong{color:var(--tsavo-petrol)}
+.live-dot,.status-dot.green{background:var(--tsavo-turquoise)}.help-icon{background:#e3f0f1;color:var(--tsavo-turquoise)}.help-card{background:#f2f7f7;border-color:#e1ebec}
+.help-card button{color:var(--tsavo-petrol)}.profile-avatar,.top-avatar{background:#fbe8df;color:#9a3c20}
+.hours-track i{background:var(--tsavo-turquoise)}.capacity-ring.planned{--ring-color:var(--tsavo-turquoise)}.capacity-ring.over{--ring-color:var(--tsavo-orange);color:#a93616}.capacity-legend i.planned{background:var(--tsavo-turquoise)}.capacity-legend i.over{background:var(--tsavo-orange)}
+.project-team-tab.selected,.project-type-tabs button.selected{color:var(--tsavo-petrol);border-color:var(--tsavo-turquoise)}
+.leave-toggle input,.task-people input{accent-color:var(--tsavo-turquoise)}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--tsavo-turquoise);outline-offset:3px}
+@media(max-width:590px){h1{font-size:30px}}

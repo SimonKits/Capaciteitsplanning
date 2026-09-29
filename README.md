@@ -1,6 +1,8 @@
-# Capaciteitsplanner
+# Tuesday — capaciteitsplanning
 
 Nederlandstalige website voor medewerkers, teams en projectplanning.
+
+De vormgeving sluit aan op https://tsavo.eu/: petrol (#004e54), turquoise (#008692), oranje (#e66239), Roboto en Zilla Slab. Het originele Tsavo-logo uit de website staat lokaal in `public/tsavo-logo.svg`. De bestaande indeling en browseropslag blijven behouden.
 
 ## Lokaal starten
 

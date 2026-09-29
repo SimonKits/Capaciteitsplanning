@@ -9,6 +9,7 @@ import LeaveBudget from './LeaveBudget.jsx';
 import { validateLeaveBudget } from './leaveModel.js';
 import { normalizePerson, weeklyHours, validateLeave } from './employeeModel.js';
 import { readProjects, writeProjects } from './projectModel.js';
+import './tsavo-theme.css';
 
 const weekdays = [
   { id: 'ma', label: 'Maandag', short: 'Ma' }, { id: 'di', label: 'Dinsdag', short: 'Di' },
@@ -81,16 +82,16 @@ function App() {
   const nav = [{ label: 'Overzicht', icon: LayoutDashboard }, { label: 'Medewerkers', icon: UsersRound }, { label: 'Projecten', icon: BriefcaseBusiness }, { label: 'Capaciteit', icon: ChartNoAxesCombined }];
   return <div className="app-shell">
     <aside className={`sidebar ${mobileNav ? 'sidebar-open' : ''}`}>
-      <a className="brand" href="#" onClick={e => e.preventDefault()}><span className="brand-mark"><i/><i/><i/><i/></span><span>ruimte<span className="brand-dot">.</span></span></a>
-      <div className="workspace-switch"><div className="workspace-avatar">Z</div><div className="workspace-copy"><strong>Zorggroep Rivierenland</strong><span>Werkruimte</span></div><ChevronDown size={15}/></div>
-      <div className="side-label">WERKPLEK</div><nav>{nav.map(item => <button key={item.label} className={`nav-item ${active === item.label ? 'active' : ''}`} onClick={() => { setActive(item.label); setMobileNav(false); }}><item.icon size={18}/><span>{item.label}</span>{item.label === 'Medewerkers' && <span className="nav-count">{people.length}</span>}</button>)}</nav>
+      <a className="brand" href="#" onClick={e => e.preventDefault()} aria-label="Tuesday capaciteitsplanning"><span>Tuesday<span className="brand-dot">.</span></span></a>
+      <a className="tsavo-brand" href="https://tsavo.eu/" target="_blank" rel="noreferrer" aria-label="Tsavo website"><img src="/tsavo-logo.svg" alt="Tsavo"/><span>Capaciteitsplanning</span></a>
+      <nav>{nav.map(item => <button key={item.label} className={`nav-item ${active === item.label ? 'active' : ''}`} onClick={() => { setActive(item.label); setMobileNav(false); }}><item.icon size={18}/><span>{item.label}</span>{item.label === 'Medewerkers' && <span className="nav-count">{people.length}</span>}</button>)}</nav>
       <div className="sidebar-divider"/><div className="side-label">BEHEER</div><button className="nav-item" onClick={() => notify('Instellingen komen binnenkort')}><Settings size={18}/><span>Instellingen</span></button>
       <div className="sidebar-spacer"/><div className="help-card"><div className="help-icon"><Sparkles size={17}/></div><strong>Even sparren?</strong><p>We helpen je op weg met je planning.</p><button onClick={() => notify('Je accountbeheerder helpt je graag verder')}>Bekijk de hulpgids <ArrowUpRight size={14}/></button></div>
       <button className="profile"><div className="profile-avatar">MV</div><span className="profile-copy"><strong>Marieke van Dijk</strong><small>Beheerder</small></span><MoreHorizontal size={19}/></button>
     </aside>
     {mobileNav && <button aria-label="Menu sluiten" className="mobile-scrim" onClick={() => setMobileNav(false)}/>}
     <main className="main-area">
-      <header className="topbar"><button className="mobile-menu" aria-label="Menu" onClick={() => setMobileNav(true)}><Menu size={20}/></button><div className="breadcrumbs"><span>Werkplek</span><span className="crumb-slash">/</span><strong>{active}</strong></div><div className="topbar-right"><span className="today-pill"><span className="live-dot"/>{new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date())}</span><div className="top-avatar">MV</div></div></header>
+      <header className="topbar"><button className="mobile-menu" aria-label="Menu" onClick={() => setMobileNav(true)}><Menu size={20}/></button><div className="breadcrumbs"><strong>{active}</strong></div><div className="topbar-right"><span className="today-pill"><span className="live-dot"/>{new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date())}</span><div className="top-avatar">MV</div></div></header>
       {active === 'Medewerkers' ? <section className="page-content">
         <div className="page-heading"><div><div className="eyebrow">JE TEAM</div><h1>Medewerkers<span className="heading-period">.</span></h1><p className="page-subtitle">Houd contracten, werkdagen en teams op één plek bij.</p></div><button className="primary-button" onClick={openAdd}><Plus size={18}/> Medewerker toevoegen</button></div>
         <div className="stats-row"><div className="stat-card"><div className="stat-top"><span>Medewerkers</span><span className="stat-icon lavender"><UsersRound size={17}/></span></div><div className="stat-number">{people.length}<span className="stat-unit"> mensen</span></div><div className="stat-foot"><span className="status-dot green"/> Actief in de planning</div></div><div className="stat-card"><div className="stat-top"><span>Contracturen</span><span className="stat-icon apricot"><Clock3 size={17}/></span></div><div className="stat-number">{totalHours}<span className="stat-unit"> u / week</span></div><div className="stat-foot">Samen afgesproken per week</div></div><div className="stat-card"><div className="stat-top"><span>Teams</span><span className="stat-icon mint"><BriefcaseBusiness size={17}/></span></div><div className="stat-number">{teams.length}<span className="stat-unit"> teams</span></div><div className="stat-foot">Met medewerkers gekoppeld</div></div></div>
