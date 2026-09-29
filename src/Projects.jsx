@@ -49,7 +49,7 @@ function Dialog({ titleId, onClose, children, className = '' }) {
       if (previous?.isConnected) previous.focus();
     };
   }, []);
-  return <div className="project-dialog-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}>
+  return <div className={`project-dialog-backdrop ${className.includes('project-editor-fullscreen') ? 'project-backdrop-fullscreen' : ''}`} onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}>
     <div className={`project-dialog ${className}`} ref={dialog} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>{children}</div>
   </div>;
 }
@@ -83,19 +83,23 @@ function ProjectEditor({ project, selectedTeam, teams, people, projects, onSave,
     if (validationError) { showError(validationError); return; }
     if (onSave(candidate) === false) showError('Opslaan is niet gelukt. Controleer of je browser gegevens mag opslaan en probeer het opnieuw. Je invoer blijft hier staan.');
   };
-  return <Dialog titleId="project-editor-title" onClose={onClose}>
-    <div className="project-dialog-header"><div><div className="eyebrow">PROJECTPLANNING</div><h2 id="project-editor-title">{project ? 'Project bewerken' : 'Nieuw project'}</h2><p>Leg het project vast en plan medewerkers per periode in.</p></div><button className="modal-close" aria-label="Projectvenster sluiten" onClick={onClose}><X size={18}/></button></div>
+  return <Dialog titleId="project-editor-title" className="project-editor-fullscreen" onClose={onClose}>
+    <div className="project-dialog-header"><div><div className="eyebrow">PROJECTPLANNING</div><h2 id="project-editor-title">{project ? 'Project bewerken' : 'Nieuw project'}</h2><p>Projectgegevens links, taken en medewerkerinzet rechts.</p></div><button className="modal-close" aria-label="Projectvenster sluiten" onClick={onClose}><X size={18}/></button></div>
     <form onSubmit={submit} noValidate>
       <div className="project-dialog-body">
         {error && <div className="project-form-error" role="alert" ref={errorRef} tabIndex={-1}>{error}</div>}
-        <div className="project-form-grid">
+        <div className="normal-project-layout"><aside className="normal-project-info"><h3>Projectgegevens</h3><div className="project-form-grid">
           <label className="project-field project-field-wide"><span>Projectnaam <b aria-hidden="true">*</b></span><input data-autofocus required value={draft.name} onChange={event => change('name', event.target.value)} placeholder="Bijv. Renovatie Parklaan" autoComplete="off"/></label>
           <label className="project-field"><span>Exact-code <b aria-hidden="true">*</b></span><input required value={draft.exactCode} onChange={event => change('exactCode', event.target.value)} placeholder="Bijv. PR-2026-001" autoComplete="off"/></label>
           <label className="project-field"><span>Projectleider <b aria-hidden="true">*</b></span><input required value={draft.leader} onChange={event => change('leader', event.target.value)} placeholder="Naam van de projectleider" autoComplete="off"/></label>
           {project ? <label className="project-field project-field-wide"><span>Team <b aria-hidden="true">*</b></span><select required value={draft.team} onChange={event => change('team', event.target.value)}>{teams.map(team => <option key={team}>{team}</option>)}</select></label> : <div className="project-team-assignment"><BriefcaseBusiness size={15}/><span>Dit project hoort bij <strong>{draft.team}</strong>.</span></div>}
         </div>
+        <div className="normal-project-counts"><span><strong>{tasks.length}</strong> taken</span><span><strong>{new Set(tasks.flatMap(task => task.employeeIds)).size}</strong> medewerkers</span></div>
+        <p className="project-form-hint">De uren in de taakregels houden rekening met verlof en ingeschakeld conceptverlof.</p>
+        </aside><section className="normal-project-tasks" aria-label="Taken en medewerkerinzet">
         <ProjectTasks tasks={tasks} people={availablePeople} onChange={value => { setTasks(value); setError(''); }}/>
         {!people.length && <button type="button" className="project-text-button" onClick={onEmployees}>Eerst medewerkers toevoegen</button>}
+        </section></div>
       </div>
       <div className="project-dialog-footer"><span><b>*</b> Verplicht</span><button type="button" className="cancel-button" onClick={onClose}>Annuleren</button><button type="submit" className="primary-button"><Check size={16}/>{project ? 'Wijzigingen opslaan' : 'Project toevoegen'}</button></div>
     </form>
