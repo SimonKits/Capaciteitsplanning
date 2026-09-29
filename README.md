@@ -36,9 +36,12 @@ Het menuonderdeel **Projecten** vervangt **Rooster**.
 
 - Een tabblad per team, gebaseerd op de medewerkers en bestaande projecten.
 - Reguliere projecten met projectnaam, Exact-code en projectleider.
-- Meerdere medewerkers per project, ieder met een begin- en einddatum en uren per week.
+- Compacte projectkaarten met titel, projectleider, Exact-code, een korte medewerkerslijst en resterende geplande uren. De volledige planning is uitklapbaar.
+- Meerdere taken per project. Selecteer per taak meerdere medewerkers met één gezamenlijke periode en hetzelfde aantal uren per persoon per week. Bij 4 uur en 3 medewerkers wordt dus 12 uur per week gepland.
+- Resterende uren tellen vanaf vandaag (inclusief) tot het einde van elke taak, alleen maandag t/m vrijdag en zonder het verlof van de betreffende medewerker. Overlappend verlof wordt eenmaal afgetrokken. Verlopen inzet telt niet mee.
+- Bestaande planning blijft bewaard en wordt bij bewerken als taken weergegeven; inzet met dezelfde periode en weekuren wordt gegroepeerd.
 - Meerdere opeenvolgende periodes voor dezelfde medewerker, bijvoorbeeld eerst 8 en daarna 16 uur per week.
-- Begin- en einddatum tellen mee. Overlappende periodes voor dezelfde medewerker binnen hetzelfde project zijn niet toegestaan; aansluitende periodes beginnen op de dag na de vorige einddatum.
+- Begin- en einddatum tellen mee. Overlappende periodes voor dezelfde medewerker binnen dezelfde taak zijn niet toegestaan; verschillende taken mogen gelijktijdig lopen en hun uren tellen op. Aansluitende periodes beginnen op de dag na de vorige einddatum.
 - Uren in stappen van een kwartier. Projecten kunnen alvast zonder medewerkers worden opgeslagen.
 - Exact-codes zijn uniek binnen een team. Er is geen koppeling met de Exact-software.
 - Projecten en hun planning bewerken of verwijderen.

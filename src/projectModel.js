@@ -37,8 +37,8 @@ export function validateProject(project, people, otherProjects = []) {
     if (allocation.endDate < allocation.startDate) return `${prefix}de einddatum moet op of na de begindatum liggen.`;
     const hours = Number(allocation.hoursPerWeek);
     if (!Number.isFinite(hours) || hours <= 0 || hours > 168 || !Number.isInteger(hours * 4)) return `${prefix}vul uren per week in tussen 0,25 en 168, in stappen van 0,25.`;
-    const overlaps = project.allocations.slice(0, i).some(a => String(a.employeeId) === String(allocation.employeeId) && periodsOverlap(a, allocation));
-    if (overlaps) return `${prefix}${employee.name} is binnen dit project al ingepland in deze periode. Pas de bestaande periode aan of kies een andere periode.`;
+    const overlaps = project.allocations.slice(0, i).some(a => String(a.employeeId) === String(allocation.employeeId) && (a.taskId || null) === (allocation.taskId || null) && periodsOverlap(a, allocation));
+    if (overlaps) return `${prefix}${employee.name} is binnen deze taak al ingepland in deze periode. Pas de bestaande periode aan of kies een andere periode.`;
   }
   return '';
 }

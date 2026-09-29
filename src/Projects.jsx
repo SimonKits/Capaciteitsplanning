@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowUpRight, BriefcaseBusiness, CalendarDays, Check, FolderKanban, Leaf, Pencil, Plus, Search, Trash2, UsersRound, X } from 'lucide-react';
 import { validateProject, createId, formatHours } from './projectModel.js';
 import './projects.css';
+import ProjectTasks from './ProjectTasks.jsx';
+import { tasksFromProject, allocationsFromTasks, remainingProjectHours } from './projectPlanning.js';
 
 const dateLabel = value => {
   if (!value) return '—';
@@ -55,6 +57,7 @@ function ProjectEditor({ project, selectedTeam, teams, people, projects, onSave,
   const [draft, setDraft] = useState(() => project ? { ...project, allocations: project.allocations.map(item => ({ ...item, employeeId: String(item.employeeId), hoursPerWeek: String(item.hoursPerWeek) })) } : {
     id: createId(), type: 'project', team: selectedTeam, name: '', exactCode: '', leader: '', allocations: [],
   });
+  const [tasks, setTasks] = useState(() => tasksFromProject(project));
   const [error, setError] = useState('');
   const errorRef = useRef(null);
   const availablePeople = useMemo(() => [...people].sort((a, b) => {
@@ -62,23 +65,18 @@ function ProjectEditor({ project, selectedTeam, teams, people, projects, onSave,
     return ownTeam || a.name.localeCompare(b.name, 'nl');
   }), [people, draft.team]);
   const change = (key, value) => { setDraft(current => ({ ...current, [key]: value })); setError(''); };
-  const updateAllocation = (id, patch) => change('allocations', draft.allocations.map(item => item.id === id ? { ...item, ...patch } : item));
-  const addAllocation = () => {
-    const person = availablePeople[0];
-    if (!person) return;
-    change('allocations', [...draft.allocations, { id: createId(), employeeId: String(person.id), employeeName: person.name, startDate: '', endDate: '', hoursPerWeek: '' }]);
-  };
   const showError = message => {
     setError(message);
     requestAnimationFrame(() => errorRef.current?.focus());
   };
   const submit = event => {
     event.preventDefault();
+    if (tasks.some(task => !task.name.trim() || !task.employeeIds.length)) { showError('Vul voor iedere taak een naam in en kies minimaal één medewerker.'); return; }
     const now = new Date().toISOString();
     const candidate = {
       ...draft, name: draft.name.trim(), exactCode: draft.exactCode.trim(), leader: draft.leader.trim(), team: draft.team.trim(),
       createdAt: project?.createdAt || now, updatedAt: now,
-      allocations: draft.allocations.map(item => ({ ...item, employeeId: String(item.employeeId), employeeName: people.find(person => String(person.id) === String(item.employeeId))?.name || item.employeeName, hoursPerWeek: Number(item.hoursPerWeek) })),
+      allocations: allocationsFromTasks(tasks, people),
     };
     const validationError = validateProject(candidate, people, projects.filter(item => item.id !== candidate.id));
     if (validationError) { showError(validationError); return; }
@@ -95,23 +93,8 @@ function ProjectEditor({ project, selectedTeam, teams, people, projects, onSave,
           <label className="project-field"><span>Projectleider <b aria-hidden="true">*</b></span><input required value={draft.leader} onChange={event => change('leader', event.target.value)} placeholder="Naam van de projectleider" autoComplete="off"/></label>
           {project ? <label className="project-field project-field-wide"><span>Team <b aria-hidden="true">*</b></span><select required value={draft.team} onChange={event => change('team', event.target.value)}>{teams.map(team => <option key={team}>{team}</option>)}</select></label> : <div className="project-team-assignment"><BriefcaseBusiness size={15}/><span>Dit project hoort bij <strong>{draft.team}</strong>.</span></div>}
         </div>
-        <div className="project-allocation-heading"><div><h3>Medewerkers inplannen</h3><p>Stel per medewerker een periode en het aantal uren per week in.</p></div><span className="project-count">{draft.allocations.length}</span></div>
-        <div className="project-allocation-editor">
-          {draft.allocations.length === 0 && <div className="project-no-allocations"><UsersRound size={23}/><div><strong>Nog geen medewerkers ingepland</strong><p>Je kunt het project alvast opslaan en de planning later aanvullen.</p></div></div>}
-          {draft.allocations.map((item, index) => {
-            const present = people.some(person => String(person.id) === item.employeeId);
-            return <fieldset className="project-allocation-row" key={item.id}>
-              <legend>Inzet {index + 1}</legend>
-              <div className="project-allocation-top"><label className="project-field"><span>Medewerker <b aria-hidden="true">*</b></span><select required value={item.employeeId} onChange={event => updateAllocation(item.id, { employeeId: event.target.value, employeeName: people.find(person => String(person.id) === event.target.value)?.name || '' })}>
-                {!present && <option value={item.employeeId}>{item.employeeName || 'Onbekende medewerker'} · Niet meer in medewerkers</option>}
-                {availablePeople.map(person => <option key={person.id} value={String(person.id)}>{person.name}{person.team ? ` · ${person.team}` : ''}</option>)}
-              </select></label><button type="button" className="project-icon-button project-remove-allocation" aria-label={`Verwijder inzet ${index + 1}`} title="Inzet verwijderen" onClick={() => change('allocations', draft.allocations.filter(row => row.id !== item.id))}><Trash2 size={16}/></button></div>
-              <div className="project-allocation-dates"><label className="project-field"><span>Van <b aria-hidden="true">*</b></span><input required type="date" aria-label={`Startdatum inzet ${index + 1}`} value={item.startDate} onChange={event => updateAllocation(item.id, { startDate: event.target.value })}/></label><label className="project-field"><span>Tot en met <b aria-hidden="true">*</b></span><input required type="date" aria-label={`Einddatum inzet ${index + 1}`} min={item.startDate || undefined} value={item.endDate} onChange={event => updateAllocation(item.id, { endDate: event.target.value })}/></label><label className="project-field"><span>Uren per week <b aria-hidden="true">*</b></span><input required type="number" aria-label={`Uren per week inzet ${index + 1}`} inputMode="decimal" min="0.25" max="168" step="0.25" placeholder="Bijv. 8" value={item.hoursPerWeek} onChange={event => updateAllocation(item.id, { hoursPerWeek: event.target.value })}/></label></div>
-            </fieldset>;
-          })}
-        </div>
-        <button type="button" className="project-add-allocation" onClick={addAllocation} disabled={!people.length}><Plus size={16}/> Medewerker inplannen</button>
-        {!people.length ? <p className="project-form-hint">Voeg eerst een medewerker toe om uren te kunnen plannen. <button type="button" className="project-text-button" onClick={onEmployees}>Naar medewerkers <ArrowUpRight size={13}/></button></p> : <p className="project-form-hint">Een medewerker kan meerdere periodes krijgen. Periodes binnen dit project mogen voor dezelfde medewerker niet overlappen.</p>}
+        <ProjectTasks tasks={tasks} people={availablePeople} onChange={value => { setTasks(value); setError(''); }}/>
+        {!people.length && <button type="button" className="project-text-button" onClick={onEmployees}>Eerst medewerkers toevoegen</button>}
       </div>
       <div className="project-dialog-footer"><span><b>*</b> Verplicht</span><button type="button" className="cancel-button" onClick={onClose}>Annuleren</button><button type="submit" className="primary-button"><Check size={16}/>{project ? 'Wijzigingen opslaan' : 'Project toevoegen'}</button></div>
     </form>
@@ -119,13 +102,18 @@ function ProjectEditor({ project, selectedTeam, teams, people, projects, onSave,
 }
 
 function ProjectCard({ project, peopleById, onEdit, onDelete }) {
-  return <article className="project-card">
-    <div className="project-card-header"><span className="project-card-icon"><FolderKanban size={21}/></span><div className="project-card-title"><div className="project-title-line"><h3>{project.name}</h3><span className="project-code">{project.exactCode}</span></div><p>Projectleider <strong>{project.leader}</strong></p></div><div className="project-card-actions"><button className="project-icon-button" onClick={() => onEdit(project)} title="Project bewerken" aria-label={`Bewerk project ${project.name}`}><Pencil size={16}/></button><button className="project-icon-button project-delete-button" onClick={() => onDelete(project)} title="Project verwijderen" aria-label={`Verwijder project ${project.name}`}><Trash2 size={16}/></button></div></div>
-    {project.allocations.length ? <div className="project-allocation-table-wrap"><table className="project-allocation-table"><caption className="sr-only">Geplande inzet voor {project.name}</caption><thead><tr><th>MEDEWERKER</th><th>PERIODE</th><th>UREN / WEEK</th></tr></thead><tbody>{project.allocations.map(allocation => {
+  const names = [...new Set(project.allocations.map(item => peopleById.get(String(item.employeeId))?.name || item.employeeName))];
+  const remaining = remainingProjectHours(project, peopleById);
+  return <article className="project-card project-card-compact">
+    <div className="project-card-header"><span className="project-card-icon"><FolderKanban size={21}/></span><div className="project-card-title"><div className="project-title-line"><h3>{project.name}</h3><span className="project-code">{project.exactCode}</span></div><p>Projectleider <strong>{project.leader}</strong></p></div><div className="project-remaining"><strong>{formatHours(remaining)} u</strong><span>Nog gepland</span></div><div className="project-card-actions"><button className="project-icon-button" onClick={() => onEdit(project)} title="Project bewerken" aria-label={`Bewerk project ${project.name}`}><Pencil size={16}/></button><button className="project-icon-button project-delete-button" onClick={() => onDelete(project)} title="Project verwijderen" aria-label={`Verwijder project ${project.name}`}><Trash2 size={16}/></button></div></div>
+    <div className="project-compact-people">{names.length ? names.slice(0, 3).join(', ') + (names.length > 3 ? ` +${names.length - 3}` : '') : 'Nog geen medewerkers ingepland'}</div>
+    <details className="project-details"><summary>Planning bekijken <span>{project.allocations.length} inzetregels</span></summary>
+    {project.allocations.length ? <div className="project-allocation-table-wrap"><table className="project-allocation-table"><caption className="sr-only">Geplande inzet voor {project.name}</caption><thead><tr><th>MEDEWERKER / TAAK</th><th>PERIODE</th><th>UREN / WEEK</th></tr></thead><tbody>{project.allocations.map(allocation => {
       const person = peopleById.get(String(allocation.employeeId));
       const name = person?.name || allocation.employeeName || 'Onbekende medewerker';
-      return <tr key={allocation.id}><td><div className="project-person"><span className={`person-avatar ${person?.color || 'mint'}`}>{person?.initials || name.trim().split(/\s+/).slice(0, 2).map(part => part[0]).join('')}</span><div><strong>{name}</strong><span>{person ? person.team || 'Geen team' : 'Niet meer in medewerkers'}</span></div></div></td><td><div className="project-period"><CalendarDays size={13}/><span><time dateTime={allocation.startDate}>{dateLabel(allocation.startDate)}</time><span className="project-date-separator">t/m</span><time dateTime={allocation.endDate}>{dateLabel(allocation.endDate)}</time></span></div></td><td><span className="project-weekly-hours">{formatHours(allocation.hoursPerWeek)} <small>uur</small></span></td></tr>;
+      return <tr key={allocation.id}><td><div className="project-person"><span className={`person-avatar ${person?.color || 'mint'}`}>{person?.initials || name.trim().split(/\s+/).slice(0, 2).map(part => part[0]).join('')}</span><div><strong>{name}</strong><span>{allocation.taskName || 'Projectinzet'}</span><span>{person ? person.team || 'Geen team' : 'Niet meer in medewerkers'}</span></div></div></td><td><div className="project-period"><CalendarDays size={13}/><span><time dateTime={allocation.startDate}>{dateLabel(allocation.startDate)}</time><span className="project-date-separator">t/m</span><time dateTime={allocation.endDate}>{dateLabel(allocation.endDate)}</time></span></div></td><td><span className="project-weekly-hours">{formatHours(allocation.hoursPerWeek)} <small>uur</small></span></td></tr>;
     })}</tbody></table></div> : <div className="project-card-unplanned"><UsersRound size={16}/><span>Nog geen medewerkers ingepland</span><button className="project-text-button" onClick={() => onEdit(project)}>Inplannen <ArrowUpRight size={13}/></button></div>}
+    </details>
   </article>;
 }
 
@@ -177,7 +165,7 @@ export default function Projects({ people, projects, onChange, onEmployees }) {
           {type === 'sustainability' ? <div className="project-empty-state project-sustainability"><div className="project-empty-icon"><Leaf size={28}/></div><span className="project-soon-badge">Volgt later</span><h2>Ruimte voor verduurzaming</h2><p>Hier komen de verduurzamingsprojecten van {selectedTeam}. De eigen indeling en manier van plannen werken we in een volgende stap uit.</p></div> : <>
             <div className="project-list-toolbar"><span>{query.trim() ? `${filtered.length} van ${teamProjects.length} projecten` : 'Alle projecten van dit team'}</span><div className="project-search"><Search size={16}/><input aria-label="Zoek projecten" placeholder="Zoek project, code of medewerker…" value={query} onChange={event => setQuery(event.target.value)}/>{query && <button aria-label="Zoekopdracht wissen" onClick={() => setQuery('')}><X size={15}/></button>}</div></div>
             {filtered.length ? <div className="project-list">{filtered.map(project => <ProjectCard key={project.id} project={project} peopleById={peopleById} onEdit={item => setEditor({ project: item })} onDelete={item => { setDeleting(item); setDeleteError(''); }}/>)}</div> : <div className="project-empty-state"><div className="project-empty-icon">{query.trim() ? <Search size={26}/> : <FolderKanban size={27}/>}</div><h2>{query.trim() ? 'Geen projecten gevonden' : 'Het eerste project begint hier'}</h2><p>{query.trim() ? 'Probeer een andere projectnaam, Exact-code, projectleider of medewerker.' : `Voeg een project toe aan ${selectedTeam} en plan medewerkers in voor de gewenste periode.`}</p>{query.trim() ? <button className="secondary-button" onClick={() => setQuery('')}>Zoekopdracht wissen</button> : <button className="primary-button" onClick={() => setEditor({ project: null })}><Plus size={16}/> Project toevoegen</button>}</div>}
-            <p className="project-list-note"><CalendarDays size={14}/><span>Uren gelden per week binnen de gekozen periode. De start- en einddatum tellen allebei mee.</span></p>
+            <p className="project-list-note"><CalendarDays size={14}/><span>Nog gepland: alle projecturen vanaf vandaag (inclusief), zonder weekenden en verlof. Iedere medewerker krijgt de uren per week van de taak; de uren worden niet verdeeld over de medewerkers.</span></p>
           </>}
         </div>
       </div>
