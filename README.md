@@ -32,7 +32,7 @@ De namen, organisatie en het profiel in de eerste versie zijn voorbeelden. Er is
 
 ## Jaarlijks verlof en conceptverlof
 
-Bij elke medewerker kun je een standaard verlofbudget per kalenderjaar invullen. Dit herhaalt zich automatisch voor volgende jaren. Via de jaarkeuze kun je voor elk jaar een afwijkend budget instellen of weer terugkeren naar de standaard. Budgetten worden niet automatisch naar rato van contractwijzigingen aangepast.
+Bij elke medewerker vul je het verlofbudget per kalenderjaar afzonderlijk in. Kies het jaar en vul de uren in; er is geen standaardbudget en niets wordt automatisch overgenomen naar volgende jaren. Een leeg jaarbudget betekent dat er voor dat jaar geen conceptverlof wordt gepland. Echt ingepland verlof blijft wel meetellen. Expliciet opgeslagen jaarbudgetten blijven behouden; eerder ingevulde standaardbudgetten worden niet meer gebruikt. Budgetten worden niet automatisch naar rato van contractwijzigingen aangepast.
 
 De teller toont het budget, echt gepland verlof, het resterende saldo en conceptverlof. Verlof kost de persoonlijke contracturen op de betreffende dag; weekenden en vrije dagen kosten nul. Overlappende periodes tellen eenmaal en verlof rond de jaarwisseling wordt aan de juiste jaren toegerekend. Een negatief saldo blijft zichtbaar; echt verlof wordt daardoor niet geblokkeerd.
 

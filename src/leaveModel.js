@@ -24,7 +24,7 @@ export function annualLeave(person, year, today = todayDate()) {
   const key = `${year}:${today}`;
   if (entries.has(key)) return entries.get(key);
   const settings = person.leaveBudget || {};
-  const budget = Math.max(0, Number(settings.years?.[year] ?? settings.annualHours) || 0);
+  const budget = Math.max(0, Number(settings.years?.[year]) || 0);
   const dates = [];
   let planned = 0;
   for (let day = new Date(`${year}-01-01T00:00:00Z`); day.getUTCFullYear() === Number(year); day = new Date(+day + DAY)) {
@@ -56,5 +56,5 @@ export function leaveOnDate(person, date) {
 export function validateLeaveBudget(budget) {
   if (!budget) return true;
   const validHours = value => value === '' || (Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 10000 && Number.isInteger(Number(value) * 4));
-  return validHours(budget.annualHours ?? '') && Object.entries(budget.years || {}).every(([year, hours]) => /^\d{4}$/.test(year) && Number(year) >= 1900 && Number(year) <= 9998 && validHours(hours));
+  return Object.entries(budget.years || {}).every(([year, hours]) => /^\d{4}$/.test(year) && Number(year) >= 1900 && Number(year) <= 9998 && validHours(hours));
 }

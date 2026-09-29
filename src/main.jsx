@@ -37,7 +37,7 @@ function App() {
   const [editing, setEditing] = useState(null);
   const [mobileNav, setMobileNav] = useState(false);
   const [toast, setToast] = useState('');
-  const [form, setForm] = useState({ name: '', role: '', team: '', days: {}, leave: [], leaveBudget: { annualHours: '', years: {}, autoConcept: true } });
+  const [form, setForm] = useState({ name: '', role: '', team: '', days: {}, leave: [], leaveBudget: { years: {}, autoConcept: true } });
   const teams = useMemo(() => [...new Set(people.map(p => p.team).filter(Boolean))], [people]);
   const filtered = people.filter(p => `${p.name} ${p.role} ${p.team}`.toLowerCase().includes(query.toLowerCase()) && (teamFilter === 'Alle teams' || p.team === teamFilter));
   const totalHours = people.reduce((a, p) => a + Number(p.contract), 0);
@@ -58,8 +58,8 @@ function App() {
     }
   }
   function notify(message) { setToast(message); window.setTimeout(() => setToast(''), 2600); }
-  function openAdd() { setEditing(null); setForm({ name: '', role: '', team: '', days: {}, leave: [], leaveBudget: { annualHours: '', years: {}, autoConcept: true } }); setModal(true); }
-  function openEdit(p) { setEditing(p.id); setForm({ name: p.name, role: p.role, team: p.team, days: { ...p.days }, leave: (p.leave || []).map(period => ({ ...period })), leaveBudget: { annualHours: '', autoConcept: true, ...p.leaveBudget, years: { ...p.leaveBudget?.years } } }); setModal(true); }
+  function openAdd() { setEditing(null); setForm({ name: '', role: '', team: '', days: {}, leave: [], leaveBudget: { years: {}, autoConcept: true } }); setModal(true); }
+  function openEdit(p) { setEditing(p.id); setForm({ name: p.name, role: p.role, team: p.team, days: { ...p.days }, leave: (p.leave || []).map(period => ({ ...period })), leaveBudget: { autoConcept: p.leaveBudget?.autoConcept !== false, years: { ...p.leaveBudget?.years } } }); setModal(true); }
   function savePerson(e) {
     e.preventDefault();
     const weekly = weeklyHours(form);
