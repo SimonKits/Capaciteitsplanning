@@ -30,6 +30,16 @@ npm run preview -- --port 5173
 
 De namen, organisatie en het profiel in de eerste versie zijn voorbeelden. Er is nog geen inlogfunctie.
 
+## Jaarlijks verlof en conceptverlof
+
+Bij elke medewerker kun je een standaard verlofbudget per kalenderjaar invullen. Dit herhaalt zich automatisch voor volgende jaren. Via de jaarkeuze kun je voor elk jaar een afwijkend budget instellen of weer terugkeren naar de standaard. Budgetten worden niet automatisch naar rato van contractwijzigingen aangepast.
+
+De teller toont het budget, echt gepland verlof, het resterende saldo en conceptverlof. Verlof kost de persoonlijke contracturen op de betreffende dag; weekenden en vrije dagen kosten nul. Overlappende periodes tellen eenmaal en verlof rond de jaarwisseling wordt aan de juiste jaren toegerekend. Een negatief saldo blijft zichtbaar; echt verlof wordt daardoor niet geblokkeerd.
+
+Met de schakelaar voor conceptverlof worden ongeplande verlofuren vanaf het einde van elk jaar teruggepland op beschikbare persoonlijke werkdagen, nooit vóór vandaag of bovenop echt verlof. Ook een gedeeltelijke laatste dag is mogelijk. Conceptverlof vermindert capaciteit én project- en taaktotalen; projecturen op gedeeltelijke verlofdagen worden naar rato verminderd. De conceptdatums zijn in het medewerkerformulier uitklapbaar en worden dynamisch herberekend bij wijzigingen aan verlof, budget of werkdaguren. Conceptverlof is geen bevestigd verlof en vermindert de teller voor echt resterend verlof niet.
+
+Schakel conceptverlof uit om uitsluitend echt ingepland verlof mee te tellen. Past het saldo niet in de beschikbare werkdagen, dan wordt het ongeplande restant vermeld. Er is geen automatische saldo-overdracht tussen jaren. De berekening gebruikt de huidige werkdaguren; historische contractroosters worden nog niet vastgelegd.
+
 ## Projecten
 
 Het menuonderdeel **Projecten** vervangt **Rooster**.

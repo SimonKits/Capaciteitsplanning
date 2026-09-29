@@ -5,6 +5,8 @@ import './styles.css';
 import Projects from './Projects.jsx';
 import Capacity from './Capacity.jsx';
 import LeaveFields from './LeaveFields.jsx';
+import LeaveBudget from './LeaveBudget.jsx';
+import { validateLeaveBudget } from './leaveModel.js';
 import { normalizePerson, weeklyHours, validateLeave } from './employeeModel.js';
 import { readProjects, writeProjects } from './projectModel.js';
 
@@ -35,7 +37,7 @@ function App() {
   const [editing, setEditing] = useState(null);
   const [mobileNav, setMobileNav] = useState(false);
   const [toast, setToast] = useState('');
-  const [form, setForm] = useState({ name: '', role: '', team: '', days: {}, leave: [] });
+  const [form, setForm] = useState({ name: '', role: '', team: '', days: {}, leave: [], leaveBudget: { annualHours: '', years: {}, autoConcept: true } });
   const teams = useMemo(() => [...new Set(people.map(p => p.team).filter(Boolean))], [people]);
   const filtered = people.filter(p => `${p.name} ${p.role} ${p.team}`.toLowerCase().includes(query.toLowerCase()) && (teamFilter === 'Alle teams' || p.team === teamFilter));
   const totalHours = people.reduce((a, p) => a + Number(p.contract), 0);
@@ -56,13 +58,14 @@ function App() {
     }
   }
   function notify(message) { setToast(message); window.setTimeout(() => setToast(''), 2600); }
-  function openAdd() { setEditing(null); setForm({ name: '', role: '', team: '', days: {}, leave: [] }); setModal(true); }
-  function openEdit(p) { setEditing(p.id); setForm({ name: p.name, role: p.role, team: p.team, days: { ...p.days }, leave: (p.leave || []).map(period => ({ ...period })) }); setModal(true); }
+  function openAdd() { setEditing(null); setForm({ name: '', role: '', team: '', days: {}, leave: [], leaveBudget: { annualHours: '', years: {}, autoConcept: true } }); setModal(true); }
+  function openEdit(p) { setEditing(p.id); setForm({ name: p.name, role: p.role, team: p.team, days: { ...p.days }, leave: (p.leave || []).map(period => ({ ...period })), leaveBudget: { annualHours: '', autoConcept: true, ...p.leaveBudget, years: { ...p.leaveBudget?.years } } }); setModal(true); }
   function savePerson(e) {
     e.preventDefault();
     const weekly = weeklyHours(form);
     if (!form.name.trim() || !form.team.trim()) { notify('Vul een naam en team in.'); return; }
     if (!validateLeave(form.leave)) { notify('Vul geldige verlofdatums in. De einddatum mag niet voor de begindatum liggen.'); return; }
+    if (!validateLeaveBudget(form.leaveBudget)) { notify('Vul geldige verlofuren in, van 0 tot 10.000 in stappen van 0,25.'); return; }
     const old = people.find(p => p.id === editing);
     const next = { ...form, id: editing || Date.now(), contract: weekly, color: old?.color || colors[people.length % colors.length], initials: form.name.trim().split(/\s+/).slice(0, 2).map(s => s[0]).join('').toUpperCase() };
     if (!persist(editing ? people.map(p => p.id === editing ? next : p) : [next, ...people])) return; setModal(false); notify(editing ? 'Medewerker bijgewerkt' : 'Medewerker toegevoegd');
@@ -103,7 +106,7 @@ function App() {
       </> : active === 'Capaciteit' ? <Capacity people={people} projects={projectState.projects} error={projectState.error} onProjects={() => setActive('Projecten')}/> : <section className="page-content placeholder-page"><div className="eyebrow">JE TEAM</div><h1>{active}<span className="heading-period">.</span></h1><div className="placeholder-card"><div className="placeholder-icon"><CalendarDays size={24}/></div><h2>Dit onderdeel volgt binnenkort</h2><p>We bouwen stap voor stap verder. Je medewerkers, contracturen en projectplanning staan alvast klaar om hier straks mee te plannen.</p><button className="secondary-button" onClick={() => setActive('Projecten')}>Bekijk projecten <ArrowUpRight size={15}/></button></div></section>}
     </main>
     {modal && <div className="modal-backdrop" onMouseDown={e => { if (e.target === e.currentTarget) setModal(false); }}><div className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div className="modal-header"><div><div className="eyebrow">TEAMBEHEER</div><h2 id="modal-title">{editing ? 'Medewerker bewerken' : 'Nieuwe medewerker'}</h2><p>Vul de werkdagen, uren en eventuele verlofperiodes in.</p></div><button className="modal-close" aria-label="Sluiten" onClick={() => setModal(false)}><X size={19}/></button></div>
-      <form onSubmit={savePerson}><div className="form-grid"><label className="field full"><span>Naam medewerker <b>*</b></span><input required autoFocus placeholder="Bijv. Noor Jansen" value={form.name} onChange={e => setForm({...form, name:e.target.value})}/></label><label className="field"><span>Functie</span><input placeholder="Bijv. Verpleegkundige" value={form.role} onChange={e => setForm({...form, role:e.target.value})}/></label><label className="field"><span>Team <b>*</b></span><input required list="team-options" placeholder="Bijv. Team Noord" value={form.team} onChange={e => setForm({...form, team:e.target.value})}/><datalist id="team-options">{teams.map(t => <option key={t} value={t}/>)}</datalist></label><div className="field full"><div className="days-heading"><span>Werkdagen en uren</span><small>Vul de uren per dag in</small></div><div className="day-fields">{weekdays.map(d => <label className={`day-field ${Number(form.days[d.id]) > 0 ? 'day-selected' : ''}`} key={d.id}><span>{d.short}</span><input aria-label={`${d.label} uren`} type="number" min="0" max="24" step="0.5" placeholder="–" value={form.days[d.id] ?? ''} onChange={e => setForm({...form, days:{...form.days,[d.id]:e.target.value}})}/><small>uur</small></label>)}</div><div className="form-total"><span>Contracturen per week</span><strong>{weeklyHours(form)} uur</strong></div></div><LeaveFields periods={form.leave} onChange={leave => setForm({ ...form, leave })}/></div><div className="modal-footer"><button type="button" className="cancel-button" onClick={() => setModal(false)}>Annuleren</button><button type="submit" className="primary-button"><Check size={16}/>{editing ? 'Wijzigingen opslaan' : 'Medewerker toevoegen'}</button></div></form></div></div>}
+      <form onSubmit={savePerson}><div className="form-grid"><label className="field full"><span>Naam medewerker <b>*</b></span><input required autoFocus placeholder="Bijv. Noor Jansen" value={form.name} onChange={e => setForm({...form, name:e.target.value})}/></label><label className="field"><span>Functie</span><input placeholder="Bijv. Verpleegkundige" value={form.role} onChange={e => setForm({...form, role:e.target.value})}/></label><label className="field"><span>Team <b>*</b></span><input required list="team-options" placeholder="Bijv. Team Noord" value={form.team} onChange={e => setForm({...form, team:e.target.value})}/><datalist id="team-options">{teams.map(t => <option key={t} value={t}/>)}</datalist></label><div className="field full"><div className="days-heading"><span>Werkdagen en uren</span><small>Vul de uren per dag in</small></div><div className="day-fields">{weekdays.map(d => <label className={`day-field ${Number(form.days[d.id]) > 0 ? 'day-selected' : ''}`} key={d.id}><span>{d.short}</span><input aria-label={`${d.label} uren`} type="number" min="0" max="24" step="0.5" placeholder="–" value={form.days[d.id] ?? ''} onChange={e => setForm({...form, days:{...form.days,[d.id]:e.target.value}})}/><small>uur</small></label>)}</div><div className="form-total"><span>Contracturen per week</span><strong>{weeklyHours(form)} uur</strong></div></div><LeaveBudget person={form} onChange={leaveBudget => setForm({ ...form, leaveBudget })}/><LeaveFields person={form} periods={form.leave} onChange={leave => setForm({ ...form, leave })}/></div><div className="modal-footer"><button type="button" className="cancel-button" onClick={() => setModal(false)}>Annuleren</button><button type="submit" className="primary-button"><Check size={16}/>{editing ? 'Wijzigingen opslaan' : 'Medewerker toevoegen'}</button></div></form></div></div>}
     {toast && <div className="toast"><Check size={17}/>{toast}</div>}
   </div>;
 }

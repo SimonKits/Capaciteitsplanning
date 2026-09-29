@@ -1,5 +1,6 @@
 import { createId } from './projectModel.js';
 import { countWorkdays, localToday } from './capacityModel.js';
+import { annualLeave, scheduledHours } from './leaveModel.js';
 
 export function tasksFromProject(project) {
   const tasks = new Map();
@@ -38,8 +39,13 @@ export function remainingProjectHours(project, peopleById, today = localToday())
       if (last && item.start <= last.end) { if (item.end > last.end) last.end = item.end; }
       else merged.push({ ...item });
     }
-    const days = countWorkdays(start, end) - merged.reduce((sum, item) => sum + countWorkdays(item.start, item.end), 0);
-    total += days * Number(allocation.hoursPerWeek) / 5;
+    let days = countWorkdays(start, end) - merged.reduce((sum, item) => sum + countWorkdays(item.start, item.end), 0);
+    for (let year = Number(start.slice(0, 4)); year <= Number(end.slice(0, 4)); year++) {
+      for (const [date, hours] of annualLeave(person, year).concept) {
+        if (date >= start && date <= end) days -= hours / scheduledHours(person, date);
+      }
+    }
+    total += Math.max(0, days) * Number(allocation.hoursPerWeek) / 5;
   }
   return Math.round(total * 1e8) / 1e8;
 }
