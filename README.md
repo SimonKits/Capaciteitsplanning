@@ -43,7 +43,20 @@ Het menuonderdeel **Projecten** vervangt **Rooster**.
 - Projecten en hun planning bewerken of verwijderen.
 - Verduurzamingsprojecten hebben een eigen plaats; de invoer en planning hiervan volgen later.
 
-**Capaciteit** en **Overzicht** volgen later. De projectgegevens bevatten stabiele medewerker- en project-ID's en periodes voor de latere capaciteitsweergave. `getAllocationsForDate` in `src/projectModel.js` geeft de inzet terug die actief is op een gekozen datum. Deze versie controleert nog niet de totale bezetting van een medewerker over verschillende projecten.
+## Capaciteit
+
+- Een week- of maandmatrix met een bezettingsbolletje per medewerker en periode.
+- Geplande uren / contracturen, bijvoorbeeld **4 / 36 u** in een volledige week.
+- Filter op het team van de medewerker; inzet op projecten van andere teams telt ook mee.
+- Klik op een bolletje voor de bijbehorende projecten en hun berekende uren.
+- Blader vooruit of achteruit, kies een datum of keer terug naar vandaag.
+- Overbezetting wordt rood weergegeven en blijft zichtbaar boven 100%.
+
+De berekening gebruikt maandag t/m vrijdag. Uren per week worden door vijf gedeeld en vermenigvuldigd met het aantal werkdagen dat binnen zowel de inzetperiode als de weergegeven week of maand ligt. Begin- en einddatum tellen mee. Buiten de periode telt een project geen uren. Weekenden tellen niet mee; feestdagen en verlof worden nog niet apart verwerkt. De opgegeven persoonlijke werkdagen hebben in deze berekening geen invloed.
+
+Contracturen worden op dezelfde manier naar de periode omgerekend. Een medewerker met 36 contracturen per week heeft bij 22 werkdagen in een maand **158,4 contracturen**. Een project met 4 uur per week over die hele maand gebruikt **17,6 uur**. Voor drie werkdagen binnen een week gebruikt dat project **2,4 uur**. Bedragen worden pas bij het tonen afgerond.
+
+**Overzicht** volgt later. De projectgegevens bevatten stabiele medewerker- en project-ID's en periodes. De berekening staat apart in `src/capacityModel.js`.
 
 ## Opslag
 
@@ -56,4 +69,4 @@ npm test
 npm run build
 ```
 
-De tests controleren de datums, overlappende inzet, validatie, opslag en selectie van uren voor een capaciteitsdatum.
+De tests controleren datums, overlappende inzet, validatie, opslag en capaciteitsberekeningen over volledige en gedeeltelijke weken en maanden.
