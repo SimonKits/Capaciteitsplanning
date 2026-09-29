@@ -23,7 +23,8 @@ npm run preview -- --port 5173
 ## Medewerkers
 
 - Medewerkers toevoegen, bewerken en verwijderen.
-- Team, functie, contracturen en uren per werkdag vastleggen.
+- Team, functie en uren per werkdag (maandag t/m vrijdag) vastleggen. Contracturen worden automatisch opgeteld; zaterdag en zondag zijn altijd nul. Dit geldt ook voor bestaande medewerkers.
+- Verlofperiodes toevoegen, aanpassen en verwijderen bij het aanmaken of bewerken van een medewerker. Begin- en einddatum zijn inclusief. Overlappende verlofperiodes worden nooit dubbel afgetrokken.
 - Zoeken en filteren op team.
 - Een medewerker met projectplanning kan pas worden verwijderd nadat die planning is verwijderd.
 
@@ -52,9 +53,9 @@ Het menuonderdeel **Projecten** vervangt **Rooster**.
 - Blader vooruit of achteruit, kies een datum of keer terug naar vandaag.
 - Overbezetting wordt rood weergegeven en blijft zichtbaar boven 100%.
 
-De berekening gebruikt maandag t/m vrijdag. Uren per week worden door vijf gedeeld en vermenigvuldigd met het aantal werkdagen dat binnen zowel de inzetperiode als de weergegeven week of maand ligt. Begin- en einddatum tellen mee. Buiten de periode telt een project geen uren. Weekenden tellen niet mee; feestdagen en verlof worden nog niet apart verwerkt. De opgegeven persoonlijke werkdagen hebben in deze berekening geen invloed.
+Projecturen worden verdeeld over vijf werkdagen (maandag t/m vrijdag). Alleen dagen binnen de inzetperiode en de weergegeven week of maand tellen mee. Op verlofdagen worden geen projecturen gemaakt. De planning blijft bewaard; buiten de verlofperiode telt deze weer mee. Weekenden tellen niet mee; feestdagen worden niet apart verwerkt.
 
-Contracturen worden op dezelfde manier naar de periode omgerekend. Een medewerker met 36 contracturen per week heeft bij 22 werkdagen in een maand **158,4 contracturen**. Een project met 4 uur per week over die hele maand gebruikt **17,6 uur**. Voor drie werkdagen binnen een week gebruikt dat project **2,4 uur**. Bedragen worden pas bij het tonen afgerond.
+Contracturen zijn de som van de ingevulde uren van maandag t/m vrijdag. De beschikbare uren in een week of maand zijn de persoonlijke daguren op alle datums in die periode, zonder de verlofdagen. Een volledige week verlof geeft dus 0 beschikbare uren en 0 gemaakte projecturen. Bij gedeeltelijk verlof blijven alleen de overige dagen meetellen. Een medewerker met 8 uur op maandag t/m donderdag heeft 32 contracturen; met maandag verlof blijven er 24 uur over. Een project van 4 uur per week gebruikt die week 3,2 uur (vier dagen maal 0,8 uur).
 
 **Overzicht** volgt later. De projectgegevens bevatten stabiele medewerker- en project-ID's en periodes. De berekening staat apart in `src/capacityModel.js`.
 

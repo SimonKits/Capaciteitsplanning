@@ -1,4 +1,5 @@
 import { isValidDate } from './projectModel.js';
+import { isOnLeave, workdayIds } from './employeeModel.js';
 
 const DAY = 86400000;
 const dateOf = value => {
@@ -69,9 +70,19 @@ export function countWorkdays(startDate, endDate) {
 }
 
 export function calculateCapacity(person, projects, period) {
-  const availableWorkdays = countWorkdays(period.startDate, period.endDate);
-  const weeklyContract = Number(person.contract);
-  const contractHours = round((Number.isFinite(weeklyContract) && weeklyContract > 0 ? weeklyContract : 0) * availableWorkdays / 5);
+  const availableDays = [];
+  let availableHours = 0;
+  let leaveDays = 0;
+  let leaveHours = 0;
+  for (let day = dateOf(period.startDate); day <= dateOf(period.endDate); day = addDays(day, 1)) {
+    const weekday = (day.getUTCDay() + 6) % 7;
+    if (weekday > 4) continue;
+    const date = iso(day);
+    const hours = person.days ? Number(person.days[workdayIds[weekday]]) || 0 : Math.max(0, Number(person.contract) || 0) / 5;
+    if (isOnLeave(person, date)) { leaveDays++; leaveHours += hours; }
+    else { availableDays.push(date); availableHours += hours; }
+  }
+  const contractHours = round(availableHours);
   const breakdown = [];
   for (const project of projects) {
     for (const allocation of project.allocations) {
@@ -79,7 +90,7 @@ export function calculateCapacity(person, projects, period) {
       const startDate = allocation.startDate > period.startDate ? allocation.startDate : period.startDate;
       const endDate = allocation.endDate < period.endDate ? allocation.endDate : period.endDate;
       if (startDate > endDate) continue;
-      const workdays = countWorkdays(startDate, endDate);
+      const workdays = availableDays.filter(date => startDate <= date && date <= endDate).length;
       if (!workdays) continue;
       const hours = Number(allocation.hoursPerWeek) * workdays / 5;
       breakdown.push({
@@ -91,7 +102,7 @@ export function calculateCapacity(person, projects, period) {
   }
   const usedHours = round(breakdown.reduce((total, item) => total + item.hours, 0));
   return {
-    usedHours, contractHours,
+    usedHours, contractHours, leaveDays, leaveHours: round(leaveHours),
     percentage: contractHours > 0 ? round(100 * usedHours / contractHours) : null,
     remainingHours: round(contractHours - usedHours),
     overbooked: usedHours - contractHours > 1e-7,
