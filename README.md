@@ -24,7 +24,8 @@ npm run preview -- --port 5173
 
 ## Medewerkers
 
-- Medewerkers toevoegen, bewerken en verwijderen.
+- Medewerkerslijst met zoeken en teamfilter, zonder overzichtskaarten of totaaltellers.
+- Bij aanmaken alleen naam, team en uren per werkdag invullen; de som vormt de contracturen. Functie, verlofbudget en verlofperiodes zijn beschikbaar bij bewerken.
 - Team, functie en uren per werkdag (maandag t/m vrijdag) vastleggen. Contracturen worden automatisch opgeteld; zaterdag en zondag zijn altijd nul. Dit geldt ook voor bestaande medewerkers.
 - Verlofperiodes toevoegen, aanpassen en verwijderen bij het aanmaken of bewerken van een medewerker. Begin- en einddatum zijn inclusief. Overlappende verlofperiodes worden nooit dubbel afgetrokken.
 - Zoeken en filteren op team.
