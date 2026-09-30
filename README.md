@@ -86,7 +86,7 @@ Het menuonderdeel **Projecten** vervangt **Rooster**.
 - Een week- of maandmatrix met een bezettingsbolletje per medewerker en periode.
 - Geplande uren / contracturen, bijvoorbeeld **4 / 36 u** in een volledige week.
 - Filter op het team van de medewerker; inzet op projecten van andere teams telt ook mee.
-- Klik op een bolletje voor de bijbehorende projecten en hun berekende uren.
+- Klik op een bolletje voor een pop-up met de werkzaamheden en berekende uren in die week of maand. De lijst heeft compacte regels van 30 pixels met project, taak of fase, Exact-code, periode en uren. Klikken op een medewerker opent de eerste zichtbare periode; in de pop-up kun je een andere zichtbare periode kiezen.
 - Blader vooruit of achteruit, kies een datum of keer terug naar vandaag.
 - Overbezetting wordt rood weergegeven en blijft zichtbaar boven 100%.
 
