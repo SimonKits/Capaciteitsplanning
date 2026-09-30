@@ -112,3 +112,7 @@ npm run build
 ```
 
 De tests controleren datums, overlappende inzet, validatie, opslag en capaciteitsberekeningen over volledige en gedeeltelijke weken en maanden.
+
+### Compact projectenoverzicht
+
+Normale projecten en verduurzamingsprojecten staan in regels van 30 pixels. Projectnaam, Exact-code, projectleider en medewerkers staan naast een benadrukte kolom **Nog gepland** met alle resterende uren vanaf vandaag, rekening houdend met feestdagen en verlof. De projectnaam en het potlood openen de volledige planning.

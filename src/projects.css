@@ -1,4 +1,17 @@
 .projects-page { padding-bottom: 44px; }
+.project-overview-scroll { overflow-x: auto; background: #fff; border: 1px solid #dfe8e9; border-radius: 8px; }
+.project-overview-scroll:focus-visible { outline: 2px solid #008692; outline-offset: 2px; }
+.project-overview-table { width: 100%; min-width: 850px; table-layout: fixed; border-collapse: collapse; }
+.project-overview-table th { height: 32px; padding: 0 10px; text-align: left; background: #f2f7f7; color: #52777a; font-size: 11px; font-weight: 600; }
+.project-overview-table td { height: 30px; padding: 0 10px; border-top: 1px solid #e8eff0; font-size: 11px; color: #52777a; }
+.project-overview-table tbody tr:hover { background: #f5f9f9; }
+.project-row-name, .project-row-text { display: block; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.project-row-name { border: 0; background: transparent; padding: 0; text-align: left; color: #004e54; font-size: 11px; font-weight: 600; line-height: 26px; }
+.project-row-name:hover { color: #008692; text-decoration: underline; }
+.project-overview-table .project-row-hours { text-align: right; white-space: nowrap; background: #00869208; font-variant-numeric: tabular-nums; }
+.project-row-hours strong { color: #004e54; font-size: 13px; }
+.project-row-actions { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+.project-row-actions .project-icon-button { height: 24px; width: 24px; flex-shrink: 0; border-radius: 4px; }
 .projects-page .page-heading { margin-bottom: 23px; gap: 18px; }
 .projects-page .page-heading .primary-button { flex-shrink: 0; }
 .projects-page button:focus-visible, .project-dialog button:focus-visible, .project-dialog select:focus-visible, .projects-page input:focus-visible { outline: 3px solid #98b6b8; outline-offset: 3px; }
