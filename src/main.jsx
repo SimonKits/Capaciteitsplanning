@@ -4,6 +4,7 @@ import { UsersRound, LayoutDashboard, CalendarDays, ChartNoAxesCombined, Setting
 import './styles.css';
 import Projects from './Projects.jsx';
 import Capacity from './Capacity.jsx';
+import Leave from './Leave.jsx';
 import { normalizePerson, weeklyHours } from './employeeModel.js';
 import { readProjects, writeProjects } from './projectModel.js';
 import './tsavo-theme.css';
@@ -26,7 +27,7 @@ const initialStored = () => { try { const saved = localStorage.getItem('ruimte-m
 
 function App() {
   const [people, setPeople] = useState(initialStored);
-  const [active, setActive] = useState(() => ({ '#projecten': 'Projecten', '#capaciteit': 'Capaciteit' })[window.location.hash] || 'Medewerkers');
+  const [active, setActive] = useState(() => ({ '#projecten': 'Projecten', '#capaciteit': 'Capaciteit', '#verlof': 'Verlof' })[window.location.hash] || 'Medewerkers');
   const [projectState, setProjectState] = useState(() => readProjects({ getItem: key => localStorage.getItem(key) }));
   const [projectSaveError, setProjectSaveError] = useState('');
   const [query, setQuery] = useState('');
@@ -73,7 +74,7 @@ function App() {
     }
     if (window.confirm(`Weet je zeker dat je ${p.name} wilt verwijderen?`)) { persist(people.filter(x => x.id !== p.id)); notify('Medewerker verwijderd'); }
   }
-  const nav = [{ label: 'Overzicht', icon: LayoutDashboard }, { label: 'Medewerkers', icon: UsersRound }, { label: 'Projecten', icon: BriefcaseBusiness }, { label: 'Capaciteit', icon: ChartNoAxesCombined }];
+  const nav = [{ label: 'Overzicht', icon: LayoutDashboard }, { label: 'Medewerkers', icon: UsersRound }, { label: 'Verlof', icon: CalendarDays }, { label: 'Projecten', icon: BriefcaseBusiness }, { label: 'Capaciteit', icon: ChartNoAxesCombined }];
   return <div className="app-shell">
     <aside className={`sidebar ${mobileNav ? 'sidebar-open' : ''}`}>
       <a className="brand" href="#" onClick={e => e.preventDefault()} aria-label="Tuesday capaciteitsplanning"><span>Tuesday<span className="brand-dot">.</span></span></a>
@@ -92,7 +93,7 @@ function App() {
           <div className="table-scroll"><table><thead><tr><th>MEDEWERKER</th><th>TEAM</th><th>CONTRACT</th><th>WERKDAGEN</th><th>UREN / WEEK</th><th><span className="sr-only">Acties</span></th></tr></thead><tbody>{filtered.map(p => { const hours = Object.values(p.days).reduce((a,b) => a + Number(b || 0), 0); return <tr key={p.id}><td><div className="person-cell"><div className={`person-avatar ${p.color}`}>{p.initials}</div><div><strong>{p.name}</strong></div></div></td><td><span className="team-tag"><span className={`team-dot ${p.color}`}/>{p.team}</span></td><td><strong className="contract-value">{p.contract} <small>uur</small></strong></td><td><div className="day-list">{weekdays.filter(d => Number(p.days[d.id]) > 0).map(d => <span title={`${d.label}: ${p.days[d.id]} uur`} className="day-chip" key={d.id}>{d.short}</span>)}</div></td><td><div className="hours-cell"><span className={`hours-track ${hours > p.contract ? 'over' : ''}`}><i style={{ width: `${(p.contract > 0 ? Math.min(100, hours / p.contract * 100) : 0)}%` }}/></span><span>{hours} <small>/ {p.contract} u</small></span></div></td><td><div className="row-actions"><button aria-label={`Bewerk ${p.name}`} title="Bewerken" onClick={() => openEdit(p)}><Pencil size={15}/></button><button aria-label={`Verwijder ${p.name}`} title="Verwijderen" onClick={() => removePerson(p)}><Trash2 size={15}/></button></div></td></tr>; })}</tbody></table></div>
           {filtered.length === 0 && <div className="empty-state"><div className="empty-icon"><UsersRound size={23}/></div><strong>Geen medewerkers gevonden</strong><span>Probeer een andere zoekterm of voeg iemand toe.</span>{people.length === 0 && <button className="primary-button" onClick={openAdd}><Plus size={16}/> Medewerker toevoegen</button>}</div>}
         </div>
-      </section> : active === 'Projecten' ? <>
+      </section> : active === 'Verlof' ? <Leave people={people} onChange={persist}/> : active === 'Projecten' ? <>
         {(projectState.error || projectSaveError) && <div role="alert" className="project-storage-error">{projectState.error || projectSaveError}</div>}
         <Projects people={people} projects={projectState.projects} onChange={persistProjects} onEmployees={() => setActive('Medewerkers')}/>
       </> : active === 'Capaciteit' ? <Capacity people={people} projects={projectState.projects} error={projectState.error} onProjects={() => setActive('Projecten')}/> : <section className="page-content placeholder-page"><div className="eyebrow">JE TEAM</div><h1>{active}<span className="heading-period">.</span></h1><div className="placeholder-card"><div className="placeholder-icon"><CalendarDays size={24}/></div><h2>Dit onderdeel volgt binnenkort</h2><p>We bouwen stap voor stap verder. Je medewerkers, contracturen en projectplanning staan alvast klaar om hier straks mee te plannen.</p><button className="secondary-button" onClick={() => setActive('Projecten')}>Bekijk projecten <ArrowUpRight size={15}/></button></div></section>}

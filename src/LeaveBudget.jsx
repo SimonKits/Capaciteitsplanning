@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { annualLeave } from './leaveModel.js';
 import { formatHours } from './projectModel.js';
 
-export default function LeaveBudget({ person, onChange }) {
-  const [year, setYear] = useState(new Date().getFullYear());
+export default function LeaveBudget({ person, onChange, initialYear = new Date().getFullYear() }) {
+  const [year, setYear] = useState(initialYear);
   const budget = person.leaveBudget || { autoConcept: true, years: {} };
   const change = patch => onChange({ ...budget, ...patch });
   const summary = annualLeave(person, year);

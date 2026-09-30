@@ -25,13 +25,19 @@ npm run preview -- --port 5173
 ## Medewerkers
 
 - Medewerkerslijst met zoeken en teamfilter, zonder overzichtskaarten of totaaltellers.
-- Bij aanmaken alleen naam, team en uren per werkdag invullen; de som vormt de contracturen. Bewerken toont dezelfde velden. Functietitels worden niet meer gebruikt. Verlofbudget en verlofperiodes zijn tijdelijk niet toegankelijk via Medewerkers; opgeslagen verlof blijft bewaard bij wijzigingen en telt mee in de planning.
+- Bij aanmaken alleen naam, team en uren per werkdag invullen; de som vormt de contracturen. Bewerken toont dezelfde velden. Functietitels worden niet meer gebruikt. Verlofbudget en verlofperiodes beheer je op het aparte blad Verlof. Opgeslagen verlof blijft bewaard bij wijzigingen en telt mee in de planning.
 - Team en uren per werkdag (maandag t/m vrijdag) vastleggen. Contracturen worden automatisch opgeteld; zaterdag en zondag zijn altijd nul. Dit geldt ook voor bestaande medewerkers.
-- Compacte medewerkersregels van circa 30 pixels hoog. Bestaande verlofperiodes blijven behouden; een aparte plaats voor verlofbeheer volgt later. Begin- en einddatum zijn inclusief, overlappende periodes worden nooit dubbel afgetrokken.
+- Compacte medewerkersregels van circa 30 pixels hoog. Bestaande verlofperiodes blijven behouden; verlofbeheer staat op het blad Verlof. Begin- en einddatum zijn inclusief, overlappende periodes worden nooit dubbel afgetrokken.
 - Zoeken en filteren op team.
 - Een medewerker met projectplanning kan pas worden verwijderd nadat die planning is verwijderd.
 
 De namen, organisatie en het profiel in de eerste versie zijn voorbeelden. Er is nog geen inlogfunctie.
+
+## Verlofblad
+
+Het menu **Verlof** toont de bestaande medewerkers in een compacte lijst, met zoeken en een teamfilter. Medewerkers toevoegen gebeurt uitsluitend op Medewerkers. Het verlofblad opent op het huidige kalenderjaar; bovenaan kun je een ander jaar kiezen.
+
+Per medewerker kun je het jaarbudget direct invullen. Het wordt opgeslagen bij het verlaten van het veld of met Enter. De lijst toont echt ingepland verlof, resterend budget en conceptverlof apart. Een leeg budget is niet hetzelfde als nul uur. Gebruik het potloodje om de eerdere verlofeditor te openen: jaarbudgetten, conceptverlof en verlofperiodes. Het geselecteerde jaar wordt meegenomen; verlofperiodes van andere jaren blijven beschikbaar en behouden. Opslaan werkt de capaciteit en projecttotalen bij.
 
 ## Jaarlijks verlof en conceptverlof
 

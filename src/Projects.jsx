@@ -23,7 +23,7 @@ function handleTabKeys(event) {
   tabs[index].click();
 }
 
-function Dialog({ titleId, onClose, children, className = '' }) {
+export function Dialog({ titleId, onClose, children, className = '' }) {
   const dialog = useRef(null);
   const close = useRef(onClose);
   close.current = onClose;
