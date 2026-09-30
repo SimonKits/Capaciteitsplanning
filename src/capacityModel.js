@@ -1,3 +1,4 @@
+import { isHoliday } from './holidayModel.js';
 import { isValidDate } from './projectModel.js';
 import { leaveOnDate, scheduledHours } from './leaveModel.js';
 
@@ -79,6 +80,7 @@ export function calculateCapacity(person, projects, period) {
     const weekday = (day.getUTCDay() + 6) % 7;
     if (weekday > 4) continue;
     const date = iso(day);
+    if (isHoliday(person, date)) continue;
     const hours = scheduledHours(person, date);
     const leave = leaveOnDate(person, date);
     if (leave.fraction > 0) leaveDays++;

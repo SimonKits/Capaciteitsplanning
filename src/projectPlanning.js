@@ -1,3 +1,4 @@
+import { isOnLeave } from './employeeModel.js';
 import { createId } from './projectModel.js';
 import { countWorkdays, localToday } from './capacityModel.js';
 import { annualLeave, scheduledHours } from './leaveModel.js';
@@ -40,6 +41,9 @@ export function remainingProjectHours(project, peopleById, today = localToday())
       else merged.push({ ...item });
     }
     let days = countWorkdays(start, end) - merged.reduce((sum, item) => sum + countWorkdays(item.start, item.end), 0);
+    for (const date of new Set((person.holidays || []).map(holiday => holiday.date))) {
+      if (date >= start && date <= end && !isOnLeave(person, date)) days -= countWorkdays(date, date);
+    }
     for (let year = Number(start.slice(0, 4)); year <= Number(end.slice(0, 4)); year++) {
       for (const [date, hours] of annualLeave(person, year).concept) {
         if (date >= start && date <= end) days -= hours / scheduledHours(person, date);

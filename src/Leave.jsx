@@ -7,6 +7,7 @@ import LeaveBudget from './LeaveBudget.jsx';
 import LeaveFields from './LeaveFields.jsx';
 import { Dialog } from './Projects.jsx';
 import './leave.css';
+import Holidays from './Holidays.jsx';
 
 function BudgetInput({ person, year, onSave }) {
   const stored = String(person.leaveBudget?.years?.[year] ?? '');
@@ -39,11 +40,12 @@ function LeaveEditor({ person, year, onSave, onClose }) {
   </Dialog>;
 }
 
-export default function Leave({ people, onChange }) {
+export default function Leave({ people, onChange, holidays, onHolidaysChange, holidayError }) {
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear);
   const [query, setQuery] = useState('');
   const [team, setTeam] = useState('');
+  const [showHolidays, setShowHolidays] = useState(false);
   const [editing, setEditing] = useState(null);
   const [message, setMessage] = useState('');
   const teams = [...new Set(people.map(person => person.team).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'nl'));
@@ -55,7 +57,7 @@ export default function Leave({ people, onChange }) {
   }
   return <section className="page-content employees-page leave-page">
     <div className="page-heading"><div><div className="eyebrow">VERLOF PER JAAR</div><h1>Verlof<span className="heading-period">.</span></h1><p className="page-subtitle">Verlofbudget, ingeplande uren en resterend saldo per medewerker.</p></div>
-      <div className="leave-page-year"><button type="button" className="cancel-button" aria-label="Vorig jaar" disabled={year <= 1900} onClick={() => setYear(year - 1)}>‹</button><label><span>Jaar</span><input aria-label="Jaar verlofoverzicht" type="number" min="1900" max="9998" step="1" value={year} onChange={event => { const next = Number(event.target.value); if (Number.isInteger(next) && next >= 1900 && next <= 9998) setYear(next); }}/></label><button type="button" className="cancel-button" aria-label="Volgend jaar" disabled={year >= 9998} onClick={() => setYear(year + 1)}>›</button><button type="button" className="secondary-button" onClick={() => setYear(currentYear)}>Huidig jaar</button></div>
+      <div className="leave-page-year"><button type="button" className="secondary-button" onClick={() => setShowHolidays(true)}>Feestdagen</button><button type="button" className="cancel-button" aria-label="Vorig jaar" disabled={year <= 1900} onClick={() => setYear(year - 1)}>‹</button><label><span>Jaar</span><input aria-label="Jaar verlofoverzicht" type="number" min="1900" max="9998" step="1" value={year} onChange={event => { const next = Number(event.target.value); if (Number.isInteger(next) && next >= 1900 && next <= 9998) setYear(next); }}/></label><button type="button" className="cancel-button" aria-label="Volgend jaar" disabled={year >= 9998} onClick={() => setYear(year + 1)}>›</button><button type="button" className="secondary-button" onClick={() => setYear(currentYear)}>Huidig jaar</button></div>
     </div>
     <div className="table-card"><div className="table-toolbar"><div className="search-box"><Search size={16}/><input aria-label="Zoek medewerkers voor verlof" placeholder="Zoek op naam of team…" value={query} onChange={event => setQuery(event.target.value)}/></div><label className="filter-select"><select aria-label="Filter verlof op team" value={team} onChange={event => setTeam(event.target.value)}><option value="">Alle teams</option>{teams.map(name => <option key={name}>{name}</option>)}</select></label></div>
     <div className="table-scroll"><table><thead><tr><th>MEDEWERKER</th><th>TEAM</th><th>VERLOFBUDGET {year}</th><th>INGEPLAND</th><th>RESTEREND</th><th>CONCEPT</th><th><span className="sr-only">Verlof bewerken</span></th></tr></thead><tbody>{filtered.map(person => {
@@ -65,6 +67,7 @@ export default function Leave({ people, onChange }) {
     })}</tbody></table></div>{!filtered.length && <div className="empty-state"><strong>{people.length ? 'Geen medewerkers gevonden' : 'Nog geen medewerkers'}</strong><span>{people.length ? 'Pas de zoekterm of het teamfilter aan.' : 'Voeg medewerkers toe op het blad Medewerkers.'}</span></div>}</div>
     <p className="leave-page-note">Budgetten worden opgeslagen zodra je het veld verlaat of op Enter drukt. Ingepland is echt verlof, berekend in contracturen. Resterend is het budget min echt verlof; conceptverlof staat apart. Gebruik het potloodje om verlofperiodes en conceptverlof te beheren.</p>
     <p className="leave-save-status" role="status">{message}</p>
+    {showHolidays && <Holidays holidays={holidays} year={year} onSave={onHolidaysChange} storageError={holidayError} onClose={() => setShowHolidays(false)}/>}
     {editing !== null && people.some(person => person.id === editing) && <LeaveEditor person={people.find(person => person.id === editing)} year={year} onSave={save} onClose={() => setEditing(null)}/>}
   </section>;
 }

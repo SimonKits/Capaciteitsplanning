@@ -90,15 +90,19 @@ Het menuonderdeel **Projecten** vervangt **Rooster**.
 - Blader vooruit of achteruit, kies een datum of keer terug naar vandaag.
 - Overbezetting wordt rood weergegeven en blijft zichtbaar boven 100%.
 
-Projecturen worden verdeeld over vijf werkdagen (maandag t/m vrijdag). Alleen dagen binnen de inzetperiode en de weergegeven week of maand tellen mee. Op verlofdagen worden geen projecturen gemaakt. De planning blijft bewaard; buiten de verlofperiode telt deze weer mee. Weekenden tellen niet mee; feestdagen worden niet apart verwerkt.
+Projecturen worden verdeeld over vijf werkdagen (maandag t/m vrijdag). Alleen dagen binnen de inzetperiode en de weergegeven week of maand tellen mee. Op verlofdagen worden geen projecturen gemaakt. De planning blijft bewaard; buiten de verlofperiode telt deze weer mee. Weekenden en de feestdagen die op het verlofblad zijn ingevoerd tellen niet mee. Op een feestdag zijn capaciteit en projecturen voor iedereen 0; ook binnen een langere vakantie kost die datum geen verlofuren.
 
 Contracturen zijn de som van de ingevulde uren van maandag t/m vrijdag. De beschikbare uren in een week of maand zijn de persoonlijke daguren op alle datums in die periode, zonder de verlofdagen. Een volledige week verlof geeft dus 0 beschikbare uren en 0 gemaakte projecturen. Bij gedeeltelijk verlof blijven alleen de overige dagen meetellen. Een medewerker met 8 uur op maandag t/m donderdag heeft 32 contracturen; met maandag verlof blijven er 24 uur over. Een project van 4 uur per week gebruikt die week 3,2 uur (vier dagen maal 0,8 uur).
 
 **Overzicht** volgt later. De projectgegevens bevatten stabiele medewerker- en project-ID's en periodes. De berekening staat apart in `src/capacityModel.js`.
 
+## Feestdagen
+
+Via **Feestdagen** op het verlofblad kun je een naam en datum toevoegen, wijzigen of verwijderen. De datums gelden voor alle medewerkers, worden apart van persoonlijk verlof bewaard en herhalen niet automatisch in volgende jaren. Ook conceptverlof slaat feestdagen over. Projecttotalen en capaciteit verwerken wijzigingen direct.
+
 ## Opslag
 
-Alles wordt uitsluitend opgeslagen in deze browser op dit websiteadres. Medewerkers blijven onder `ruimte-medewerkers` staan; projecten staan apart onder `ruimte-projecten-v1`, met schemaversie 1. Bij onleesbare projectopslag wordt overschrijven geblokkeerd. Voor gedeeld gebruik door collega's zijn een database en toegangsbeheer nodig.
+Alles wordt uitsluitend opgeslagen in deze browser op dit websiteadres. Medewerkers blijven onder `ruimte-medewerkers` staan; projecten staan apart onder `ruimte-projecten-v1`, met schemaversie 1. Feestdagen staan onder `tuesday-feestdagen-v1`. Bij onleesbare projectopslag wordt overschrijven geblokkeerd. Voor gedeeld gebruik door collega's zijn een database en toegangsbeheer nodig.
 
 ## Controles
 

@@ -1,3 +1,4 @@
+import { isHoliday } from './holidayModel.js';
 import { isValidDate } from './projectModel.js';
 import { isOnLeave, workdayIds } from './employeeModel.js';
 
@@ -6,6 +7,7 @@ const iso = date => date.toISOString().slice(0, 10);
 const rounded = value => Math.round(value * 1e8) / 1e8;
 const todayDate = () => { const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`; };
 export function scheduledHours(person, date) {
+  if (isHoliday(person, date)) return 0;
   const day = (new Date(`${date}T00:00:00Z`).getUTCDay() + 6) % 7;
   return day < 5 ? Math.max(0, Number(person.days?.[workdayIds[day]] ?? (person.days ? 0 : Number(person.contract) / 5)) || 0) : 0;
 }
@@ -47,6 +49,7 @@ export function annualLeave(person, year, today = todayDate()) {
 }
 
 export function leaveOnDate(person, date) {
+  if (isHoliday(person, date)) return { hours: 0, fraction: 0, conceptHours: 0 };
   const hours = scheduledHours(person, date);
   if (isOnLeave(person, date)) return { hours, fraction: 1, conceptHours: 0 };
   const conceptHours = annualLeave(person, Number(date.slice(0, 4))).concept.get(date) || 0;
