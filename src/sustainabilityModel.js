@@ -19,7 +19,8 @@ export function resolvePhases(phases) {
     const startDate = previous && phase.linked ? shiftDate(previous.endDate, 1) : phase.startDate;
     const weeks = Number(phase.weeks);
     const endDate = Number.isInteger(weeks) && weeks > 0 && weeks <= 520 ? shiftDate(startDate, weeks * 7 - 1) : '';
-    resolved.push({ ...phase, startDate, endDate });
+    const steeringDate = phase.steeringLinked === false ? (phase.steeringDate || '') : shiftDate(endDate, 1);
+    resolved.push({ ...phase, startDate, endDate, steeringDate });
   }
   return resolved;
 }
@@ -42,11 +43,13 @@ export function hasSustainabilityShape(project) {
       && phase.overrides && typeof phase.overrides === 'object' && !Array.isArray(phase.overrides)
       && Object.values(phase.overrides).every(value => value && typeof value === 'object' && (value.hoursPerWeek === undefined || hoursValid(value.hoursPerWeek))
         && (!value.customDates || (isValidDate(value.startDate) && isValidDate(value.endDate) && value.startDate <= value.endDate))))
-    && resolvePhases(project.phases).every(phase => isValidDate(phase.startDate) && isValidDate(phase.endDate));
+    && resolvePhases(project.phases).every(phase => isValidDate(phase.startDate) && isValidDate(phase.endDate)
+      && (phase.steeringLinked === undefined || typeof phase.steeringLinked === 'boolean')
+      && isValidDate(phase.steeringDate) && phase.steeringDate > phase.endDate);
 }
 export function validateSustainability(project, people) {
   if (!people.some(person => String(person.id) === project.leaderId)) return 'Selecteer een projectleider uit de medewerkerslijst.';
-  if (!hasSustainabilityShape(project)) return 'Controleer alle fases: vul een begindatum, een duur van 1–520 hele weken en geldige uren (0–168, in stappen van 0,25) in. Controleer ook eigen tijdlijnen.';
+  if (!hasSustainabilityShape(project)) return 'Controleer de fasedatums, de duur (1–520 hele weken) en de uren (0–168, in stappen van 0,25). Iedere stuurgroep moet na het einde van de bijbehorende fase liggen. Controleer ook eigen tijdlijnen.';
   for (const phase of project.phases) {
     const seen = new Set();
     for (const member of phaseMembers(project, phase)) {

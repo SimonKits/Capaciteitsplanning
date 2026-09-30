@@ -116,3 +116,9 @@ De tests controleren datums, overlappende inzet, validatie, opslag en capaciteit
 ### Compact projectenoverzicht
 
 Normale projecten en verduurzamingsprojecten staan in regels van 30 pixels. Projectnaam, Exact-code, projectleider en medewerkers staan naast een benadrukte kolom **Nog gepland** met alle resterende uren vanaf vandaag, rekening houdend met feestdagen en verlof. De projectnaam en het potlood openen de volledige planning.
+
+### Fasedatums en stuurgroepen
+
+De editor voor verduurzamingsprojecten is schermvullend, met projectgegevens links en planning rechts. Bovenaan staan de begindatums, duur in weken, einddatums en stuurgroepen van EAR, PP, RP en DE bij elkaar. Gekoppelde fases volgen nog steeds de dag na de vorige fase.
+
+Elke fase heeft een stuurgroep van één dag, standaard de dag na de fase. Deze schuift mee met de fase. Zet **Volgt fase** uit om een vaste stuurgroepdatum na de fase te kiezen. Een stuurgroep verschuift de volgende fase niet en maakt geen inzetregels, projecturen of capaciteitsverbruik. Bestaande projecten krijgen deze standaarddatums bij het openen; eigen stuurgroepdatums worden met het project opgeslagen.

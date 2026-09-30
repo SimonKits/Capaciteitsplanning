@@ -39,31 +39,39 @@ export default function SustainabilityEditor({ project, selectedTeam, teams, peo
     if (commonError) return showError(commonError);
     if (onSave(candidate) === false) showError('Opslaan is niet gelukt. Je invoer blijft bewaard in dit venster.');
   }
-  return <Dialog titleId="sustainability-title" className="sustainability-dialog" onClose={onClose}>
-    <div className="project-dialog-header"><div><div className="eyebrow">VERDUURZAMING</div><h2 id="sustainability-title">{project ? 'Verduurzamingsproject bewerken' : 'Nieuw verduurzamingsproject'}</h2><p>Plan rollen en medewerkers in EAR, PP, RP en DE.</p></div><button type="button" className="modal-close" aria-label="Projectvenster sluiten" onClick={onClose}><X size={18}/></button></div>
+  return <Dialog titleId="sustainability-title" className="project-editor-fullscreen sustainability-dialog" onClose={onClose}>
+    <div className="project-dialog-header"><div><div className="eyebrow">VERDUURZAMING</div><h2 id="sustainability-title">{project ? 'Verduurzamingsproject bewerken' : 'Nieuw verduurzamingsproject'}</h2><p>Projectgegevens links, fasedatums, stuurgroepen en medewerkerinzet rechts.</p></div><button type="button" className="modal-close" aria-label="Projectvenster sluiten" onClick={onClose}><X size={18}/></button></div>
     <form onSubmit={submit} noValidate><div className="project-dialog-body">
       {error && <div className="project-form-error" role="alert" tabIndex={-1} ref={errorRef}>{error}</div>}
-      <div className="project-form-grid">
+      <div className="normal-project-layout"><aside className="normal-project-info"><h3>Projectgegevens</h3><div className="project-form-grid">
         <label className="project-field project-field-wide"><span>Projectnaam *</span><input data-autofocus value={draft.name} onChange={event => change({ name: event.target.value })}/></label>
         <label className="project-field"><span>Exact-code *</span><input value={draft.exactCode} onChange={event => change({ exactCode: event.target.value })}/></label>
         <label className="project-field"><span>Projectleider *</span><select value={draft.leaderId} onChange={event => { const leaderId = event.target.value; change({ leaderId, members: leaderId && !draft.members.some(member => member.employeeId === leaderId && member.role === 'Projectleider') ? [...draft.members, { id: createId(), employeeId: leaderId, role: 'Projectleider' }] : draft.members }); }}><option value="">Kies een medewerker</option>{sortedPeople.map(person => <option key={person.id} value={String(person.id)}>{person.name}</option>)}</select></label>
         <label className="project-field project-field-wide"><span>Team *</span><select value={draft.team} onChange={event => change({ team: event.target.value })}>{teams.map(team => <option key={team}>{team}</option>)}</select></label>
       </div>
+      </aside><section className="normal-project-tasks" aria-label="Faseplanning en medewerkerinzet">
+      <section className="sustainability-section sustainability-date-window"><h3>Fasedatums en stuurgroepen</h3><p>Pas hier de startdatum en duur aan. Gekoppelde fases schuiven mee en beginnen de dag na de vorige fase. Elke stuurgroep duurt één dag en plant geen uren. Standaard volgt deze de dag na de fase; kies een eigen datum om hiervan af te wijken. Een stuurgroep verschuift de volgende fase niet.</p>
+        <div className="sustainability-date-scroll"><table className="sustainability-date-table"><thead><tr><th>Fase</th><th>Koppeling</th><th>Begindatum</th><th>Weken</th><th>Einddatum</th><th>Stuurgroep · 0 uur</th></tr></thead><tbody>{phases.map((phase, index) => <tr key={phase.code}>
+          <th scope="row">{phase.code}</th>
+          <td>{index > 0 ? <label className="leave-toggle"><input type="checkbox" checked={phase.linked} onChange={event => updatePhase(phase.code, { linked: event.target.checked, startDate: phase.startDate })}/><span>Volgt {phases[index - 1].code}</span></label> : 'Eigen start'}</td>
+          <td><input aria-label={`Begindatum ${phase.code}`} type="date" value={phase.startDate} disabled={phase.linked && index > 0} onChange={event => updatePhase(phase.code, { startDate: event.target.value })}/></td>
+          <td><input aria-label={`Duur ${phase.code} in weken`} type="number" min="1" max="520" step="1" value={phase.weeks} onChange={event => updatePhase(phase.code, { weeks: event.target.value })}/></td>
+          <td>{dateLabel(phase.endDate)}</td>
+          <td><input aria-label={`Stuurgroepdatum ${phase.code}`} type="date" value={phase.steeringDate} disabled={phase.steeringLinked !== false} onChange={event => updatePhase(phase.code, { steeringDate: event.target.value })}/><label className="leave-toggle"><input type="checkbox" checked={phase.steeringLinked !== false} onChange={event => updatePhase(phase.code, { steeringLinked: event.target.checked, steeringDate: phase.steeringDate })}/><span>Volgt fase</span></label></td>
+        </tr>)}</tbody></table></div>
+        <ol className="sustainability-timeline">{phases.map(phase => <li key={phase.code}><strong>{phase.code}</strong><span>{dateLabel(phase.startDate)} – {dateLabel(phase.endDate)}</span><span className="sustainability-steering">◆ Stuurgroep {dateLabel(phase.steeringDate)} · 0 u</span></li>)}</ol>
+      </section>
       <section className="sustainability-section"><h3>Medewerkers en rollen voor alle fases</h3><p>Deze medewerkers volgen automatisch de datums en roluren van iedere fase. De gekozen projectleider wordt hier ook toegevoegd. Bij wijzigen van de projectleider kun je de eerdere inzet hieronder verwijderen.</p>
         <MemberPicker people={sortedPeople} members={draft.members} label="voor alle fases" onAdd={member => change({ members: [...draft.members, member] })}/>
         <div className="sustainability-members">{draft.members.map(member => <div key={member.id}><span><strong>{peopleById.get(member.employeeId)?.name || 'Onbekende medewerker'}</strong><small>{member.role}</small></span><button type="button" className="project-icon-button" aria-label={`Verwijder ${peopleById.get(member.employeeId)?.name} als ${member.role}`} onClick={() => change({ members: draft.members.filter(item => item.id !== member.id) })}><Trash2 size={15}/></button></div>)}</div>
       </section>
-      <section className="sustainability-section"><h3>Fases en tijdlijn</h3><p>Een gekoppelde fase start de dag na de vorige fase. Een week is zeven kalenderdagen; alleen maandag t/m vrijdag telt voor projecturen. Een losgekoppelde fase houdt haar eigen begindatum. Fases daarna kunnen daaraan gekoppeld blijven.</p>
-        <ol className="sustainability-timeline">{phases.map(phase => <li key={phase.code}><strong>{phase.code}</strong><span>{dateLabel(phase.startDate)}</span><span>t/m {dateLabel(phase.endDate)}</span><small>{phase.linked ? 'Gekoppeld' : 'Eigen startdatum'}</small></li>)}</ol>
-      </section>
-      {phases.map((phase, index) => {
+      {phases.map(phase => {
         const members = phaseMembers(draft, phase);
         const allocations = sustainabilityAllocations(draft, people).filter(item => item.phaseCode === phase.code);
         const validPreview = isValidDate(phase.startDate) && isValidDate(phase.endDate) && allocations.every(item => isValidDate(item.startDate) && isValidDate(item.endDate) && item.startDate <= item.endDate && Number.isFinite(item.hoursPerWeek));
         const total = validPreview ? remainingProjectHours({ allocations }, peopleById, allocations.reduce((start, item) => item.startDate < start ? item.startDate : start, phase.startDate)) : null;
         return <fieldset className="sustainability-phase" key={phase.code}><legend>{phase.code}</legend>
-          {index > 0 && <label className="leave-toggle"><input type="checkbox" checked={phase.linked} onChange={event => updatePhase(phase.code, { linked: event.target.checked, startDate: phase.startDate })}/><span>Koppel aan {phases[index - 1].code}: schuif automatisch mee</span></label>}
-          <div className="project-allocation-dates"><label className="project-field"><span>Begindatum {phase.code} *</span><input type="date" value={phase.startDate} disabled={phase.linked && index > 0} onChange={event => updatePhase(phase.code, { startDate: event.target.value })}/></label><label className="project-field"><span>Duur {phase.code} in weken *</span><input type="number" min="1" max="520" step="1" value={phase.weeks} onChange={event => updatePhase(phase.code, { weeks: event.target.value })}/></label><div className="project-field"><span>Einddatum</span><strong>{dateLabel(phase.endDate)}</strong></div></div>
+          <p className="project-form-hint">{dateLabel(phase.startDate)} – {dateLabel(phase.endDate)} · Stuurgroep {dateLabel(phase.steeringDate)} (0 uur)</p>
           <h4>Uren per medewerker per week, per rol</h4><div className="sustainability-role-hours">{ROLES.map(role => <label key={role} className="project-field"><span>{role}</span><input aria-label={`${phase.code} uren ${role}`} type="number" min="0" max="168" step="0.25" value={phase.roleHours[role]} onChange={event => updatePhase(phase.code, { roleHours: { ...phase.roleHours, [role]: event.target.value } })}/></label>)}</div>
           <h4>Inzet in {phase.code}</h4><p className="project-form-hint">0 uur betekent geen inzet. Eigen datums blijven vaststaan als de fase verschuift; schakel ze uit om de fase weer te volgen. Meerdere rollen voor dezelfde medewerker tellen bij elkaar op.</p>
           {members.map(member => {
@@ -81,6 +89,6 @@ export default function SustainabilityEditor({ project, selectedTeam, teams, peo
           <div className="task-hours-summary"><span>Totaal ingepland in {phase.code}, na verlof en conceptverlof</span><strong>{total === null ? 'Vul geldige datums in' : `${formatHours(total)} uur`}</strong></div>
         </fieldset>;
       })}
-    </div><div className="project-dialog-footer"><button type="button" className="cancel-button" onClick={onClose}>Annuleren</button><button type="submit" className="primary-button"><Check size={16}/>{project ? 'Wijzigingen opslaan' : 'Project toevoegen'}</button></div></form>
+    </section></div></div><div className="project-dialog-footer"><button type="button" className="cancel-button" onClick={onClose}>Annuleren</button><button type="submit" className="primary-button"><Check size={16}/>{project ? 'Wijzigingen opslaan' : 'Project toevoegen'}</button></div></form>
   </Dialog>;
 }
